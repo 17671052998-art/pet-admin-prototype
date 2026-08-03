@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>宠物后台视觉比对</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;background:#eef1f6;color:#172033;font:14px/1.5 Inter,-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
+    main{width:1280px;margin:0 auto;padding:24px}
+    h1{margin:0 0 6px;font-size:24px}
+    p{margin:0 0 18px;color:#68758a}
+    .compare{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    figure{margin:0;padding:14px;border:1px solid #dce3ee;border-radius:10px;background:#fff}
+    figcaption{margin-bottom:10px;font-weight:750}
+    img{display:block;width:100%;height:auto;border:1px solid #e3e8f0}
+  </style>
+</head>
+<body>
+  <main>
+    <h1>现有后台视觉语言 × 宠物后台实现</h1>
+    <p>同为 1280 × 720 桌面视口，重点比较侧栏、顶栏、内容密度、表单/表格层级和主操作风格。</p>
+    <section class="compare">
+      <figure>
+        <figcaption>视觉基准：Lottery Admin</figcaption>
+        <img src="existing-admin-reference.png" alt="现有后台视觉基准">
+      </figure>
+      <figure>
+        <figcaption>宠物后台：默认列表页</figcaption>
+        <img src="qa-default-final-v3.png" alt="宠物后台实现">
+      </figure>
+    </section>
+  </main>
+</body>
+</html>
