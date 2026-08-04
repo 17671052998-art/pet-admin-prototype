@@ -794,8 +794,6 @@ export function App() {
                         <th>宠物ID</th>
                         <th>宠物</th>
                         <th>品级</th>
-                        <th>三星形态资源</th>
-                        <th>外部展示资源</th>
                         <th>更新时间</th>
                         <th className="action-col">操作</th>
                       </tr>
@@ -817,34 +815,6 @@ export function App() {
                             <span className={`grade grade-${item.grade}`}>
                               {item.grade}
                             </span>
-                          </td>
-                          <td>
-                            <div className="completion">
-                              <strong>{item.resource}</strong>
-                              <span
-                                className={
-                                  item.resource === "6/6"
-                                    ? "complete"
-                                    : "incomplete"
-                                }
-                              >
-                                {item.resource === "6/6" ? "完整" : "待补充"}
-                              </span>
-                            </div>
-                          </td>
-                          <td>
-                            <div className="completion">
-                              <strong>{item.external}</strong>
-                              <span
-                                className={
-                                  item.external === "2/2"
-                                    ? "complete"
-                                    : "incomplete"
-                                }
-                              >
-                                {item.external === "2/2" ? "完整" : "待补充"}
-                              </span>
-                            </div>
                           </td>
                           <td className="muted">{item.updated}</td>
                           <td>
