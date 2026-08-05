@@ -471,29 +471,23 @@ tbody tr:hover {
 }
 
 .grade-A {
-  background: #eef1f5;
-  color: #59677d;
+  background: #eee9ff;
+  color: #6848c7;
 }
 
 .grade-S {
-  background: #e8f2ff;
-  color: #2360b8;
+  background: #fff1d8;
+  color: #9b5f00;
 }
 
 .grade-SS {
-  background: #eee9ff;
-  color: #6848c7;
+  background: #fff1d8;
+  color: #9b5f00;
 }
 
 .grade-SSS {
   background: #fff1d8;
   color: #9b5f00;
-}
-
-.state-stack {
-  display: grid;
-  justify-items: start;
-  gap: 5px;
 }
 
 .state-pill {
@@ -629,11 +623,6 @@ tbody tr:hover {
   grid-template-rows: auto minmax(0, 1fr) auto;
 }
 
-.user-pet-drawer {
-  width: min(620px, calc(100vw - 280px));
-  grid-template-rows: auto minmax(0, 1fr) auto;
-}
-
 .drawer-head {
   min-height: 86px;
   display: flex;
@@ -737,73 +726,6 @@ tbody tr:hover {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
-}
-
-.user-pet-summary {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 26px;
-  padding: 16px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface-2);
-}
-
-.user-pet-summary strong,
-.user-pet-summary small {
-  display: block;
-}
-
-.user-pet-summary small {
-  margin-top: 4px;
-  color: var(--muted);
-  font-size: 11px;
-}
-
-.user-pet-form-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.setting-list {
-  overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-}
-
-.setting-row {
-  min-height: 66px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  padding: 12px 14px;
-  border-bottom: 1px solid var(--line-2);
-  cursor: pointer;
-}
-
-.setting-row:last-child {
-  border-bottom: 0;
-}
-
-.setting-row strong,
-.setting-row small {
-  display: block;
-}
-
-.setting-row small {
-  margin-top: 4px;
-  color: var(--muted);
-  font-size: 11px;
-}
-
-.setting-row input[type="checkbox"] {
-  width: 18px;
-  min-height: 18px;
-  flex: 0 0 auto;
-  padding: 0;
 }
 
 .half-field {

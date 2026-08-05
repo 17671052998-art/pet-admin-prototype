@@ -96,7 +96,6 @@ const userPets = [
     experience: 40000,
     nextExperience: 68000,
     carried: true,
-    homepage: true,
     updated: "2026-08-03 18:22",
   },
   {
@@ -111,7 +110,6 @@ const userPets = [
     experience: 8600,
     nextExperience: 12000,
     carried: false,
-    homepage: false,
     updated: "2026-08-02 13:46",
   },
   {
@@ -126,7 +124,6 @@ const userPets = [
     experience: 93200,
     nextExperience: 108000,
     carried: true,
-    homepage: true,
     updated: "2026-08-01 21:08",
   },
   {
@@ -141,7 +138,6 @@ const userPets = [
     experience: 4200,
     nextExperience: 7000,
     carried: false,
-    homepage: false,
     updated: "2026-07-31 17:35",
   },
   {
@@ -156,7 +152,6 @@ const userPets = [
     experience: 32000,
     nextExperience: 48000,
     carried: true,
-    homepage: false,
     updated: "2026-07-30 11:16",
   },
 ];
@@ -760,158 +755,6 @@ function EggDrawer({ egg, mode, onClose, onSaved }) {
   );
 }
 
-function UserPetDrawer({ userPet, onClose, onSaved }) {
-  const [level, setLevel] = useState(userPet.level);
-  const [experience, setExperience] = useState(userPet.experience);
-  const [star, setStar] = useState(userPet.star);
-  const [carried, setCarried] = useState(userPet.carried);
-  const [homepage, setHomepage] = useState(userPet.homepage);
-  const [error, setError] = useState("");
-
-  const save = () => {
-    const numericLevel = Number(level);
-    const numericExperience = Number(experience);
-    const minimumLevel = star === 3 ? 50 : star === 2 ? 30 : 1;
-
-    if (!Number.isInteger(numericLevel) || numericLevel < 1 || numericLevel > 100) {
-      setError("宠物等级需为 1–100 的整数");
-      return;
-    }
-    if (!Number.isInteger(numericExperience) || numericExperience < 0) {
-      setError("成长值需为不小于 0 的整数");
-      return;
-    }
-    if (numericLevel < minimumLevel) {
-      setError(`${star} 星形态最低需要达到 ${minimumLevel} 级`);
-      return;
-    }
-
-    setError("");
-    onSaved("用户宠物配置已保存");
-  };
-
-  return (
-    <>
-      <div className="mask" onClick={onClose} />
-      <aside className="drawer user-pet-drawer" aria-label="用户宠物编辑抽屉">
-        <header className="drawer-head">
-          <div>
-            <p className="eyebrow">{userPet.id}</p>
-            <h2>编辑用户宠物</h2>
-            <p>
-              {userPet.nickname} · 用户ID {userPet.userId}
-            </p>
-          </div>
-          <button className="text-btn" onClick={onClose}>
-            关闭
-          </button>
-        </header>
-
-        <div className="drawer-body">
-          <section className="user-pet-summary">
-            <span className={`grade grade-${userPet.grade}`}>
-              {userPet.grade}
-            </span>
-            <div>
-              <strong>{userPet.name}</strong>
-              <small>
-                宠物配置ID {userPet.petId} · 用户宠物ID {userPet.id}
-              </small>
-            </div>
-          </section>
-
-          <section className="form-section">
-            <div className="section-title">
-              <h3>成长信息</h3>
-              <p>所有宠物等级上限为 100；二星和三星形态分别在 30、50 级开放。</p>
-            </div>
-            <div className="user-pet-form-grid">
-              <div className="field">
-                <label htmlFor="user-pet-level">当前等级 *</label>
-                <input
-                  id="user-pet-level"
-                  type="number"
-                  min="1"
-                  max="100"
-                  value={level}
-                  onChange={(event) => setLevel(event.target.value)}
-                />
-              </div>
-              <div className="field">
-                <label htmlFor="user-pet-experience">当前成长值 *</label>
-                <input
-                  id="user-pet-experience"
-                  type="number"
-                  min="0"
-                  value={experience}
-                  onChange={(event) => setExperience(event.target.value)}
-                />
-              </div>
-              <div className="field">
-                <label htmlFor="user-pet-star">当前形态 *</label>
-                <select
-                  id="user-pet-star"
-                  value={star}
-                  onChange={(event) => setStar(Number(event.target.value))}
-                >
-                  <option value="1">一星形态</option>
-                  <option value="2">二星形态</option>
-                  <option value="3">三星形态</option>
-                </select>
-              </div>
-            </div>
-          </section>
-
-          <section className="form-section">
-            <div className="section-title">
-              <h3>展示设置</h3>
-              <p>修改携带状态时，同一用户的其他宠物将自动取消携带。</p>
-            </div>
-            <div className="setting-list">
-              <label className="setting-row">
-                <span>
-                  <strong>携带宠物</strong>
-                  <small>开启后作为用户当前携带的宠物</small>
-                </span>
-                <input
-                  type="checkbox"
-                  checked={carried}
-                  onChange={(event) => setCarried(event.target.checked)}
-                />
-              </label>
-              <label className="setting-row">
-                <span>
-                  <strong>主页展示</strong>
-                  <small>开启后在个人主页和资料卡片展示</small>
-                </span>
-                <input
-                  type="checkbox"
-                  checked={homepage}
-                  onChange={(event) => setHomepage(event.target.checked)}
-                />
-              </label>
-            </div>
-          </section>
-
-          {error && <div className="form-error">{error}</div>}
-        </div>
-
-        <footer className="drawer-foot">
-          <span>保存后立即更新该用户的宠物数据</span>
-          <div>
-            <button className="btn" onClick={onClose}>
-              取消
-            </button>
-            <button className="btn primary" onClick={save}>
-              保存配置
-            </button>
-          </div>
-        </footer>
-      </aside>
-    </>
-  );
-}
-
 export function App() {
   const [module, setModule] = useState("pet");
   const [keyword, setKeyword] = useState("");
@@ -936,7 +779,7 @@ export function App() {
     },
     userPet: {
       title: "用户宠物",
-      description: "查询每个用户拥有的宠物实例，并编辑成长与展示状态。",
+      description: "查询每个用户拥有的宠物实例及当前携带状态。",
       listTitle: "用户宠物列表",
       listDescription: "同一用户可拥有重复宠物，通过用户宠物ID区分实例。",
       placeholder: "搜索用户ID / 昵称 / 宠物名称 / 用户宠物ID",
@@ -1196,9 +1039,8 @@ export function App() {
                         <th>宠物</th>
                         <th>品级</th>
                         <th>成长</th>
-                        <th>展示状态</th>
+                        <th>携带状态</th>
                         <th>更新时间</th>
-                        <th className="action-col">操作</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1228,30 +1070,13 @@ export function App() {
                             </small>
                           </td>
                           <td>
-                            <div className="state-stack">
-                              <span
-                                className={`state-pill ${item.carried ? "on" : "off"}`}
-                              >
-                                {item.carried ? "已携带" : "未携带"}
-                              </span>
-                              <span
-                                className={`state-pill ${item.homepage ? "on" : "off"}`}
-                              >
-                                {item.homepage ? "主页展示" : "未展示"}
-                              </span>
-                            </div>
+                            <span
+                              className={`state-pill ${item.carried ? "on" : "off"}`}
+                            >
+                              {item.carried ? "已携带" : "未携带"}
+                            </span>
                           </td>
                           <td className="muted">{item.updated}</td>
-                          <td>
-                            <button
-                              className="link-btn"
-                              onClick={() =>
-                                setDrawer({ type: "userPet", item })
-                              }
-                            >
-                              编辑
-                            </button>
-                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -1300,14 +1125,6 @@ export function App() {
           onSaved={notify}
         />
       )}
-      {drawer?.type === "userPet" && (
-        <UserPetDrawer
-          userPet={drawer.item}
-          onClose={() => setDrawer(null)}
-          onSaved={notify}
-        />
-      )}
-
       {toast && <div className="toast">{toast}</div>}
     </div>
   );
