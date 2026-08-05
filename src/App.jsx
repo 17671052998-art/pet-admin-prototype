@@ -54,7 +54,7 @@ const eggs = [
   {
     id: "EGG-SS-001",
     grade: "SS",
-    cover: "pet-egg-ss.webp",
+    cover: "pet-egg-ss.png",
     hatching: "pet-egg-ss-hatching.mp4",
     petIds: ["PET-001", "PET-002"],
     pets: "月曜龙、潮汐鲸",
@@ -64,7 +64,7 @@ const eggs = [
   {
     id: "EGG-S-001",
     grade: "S",
-    cover: "pet-egg-s.webp",
+    cover: "pet-egg-s.png",
     hatching: "pet-egg-s-hatching.webp",
     petIds: ["PET-002", "PET-003"],
     pets: "潮汐鲸、棉云兔",
@@ -74,7 +74,7 @@ const eggs = [
   {
     id: "EGG-SSS-001",
     grade: "SSS",
-    cover: "pet-egg-sss.webp",
+    cover: "pet-egg-sss.png",
     hatching: "pet-egg-sss-hatching.mp4",
     petIds: ["PET-004"],
     pets: "曜金狮",
@@ -122,7 +122,12 @@ function UploadField({
   onFileChange,
 }) {
   const [fileName, setFileName] = useState(file);
-  const inputAccept = accept === "WebP" ? ".webp" : ".webp,.mp4";
+  const inputAccept =
+    accept === "PNG"
+      ? ".png"
+      : accept === "WebP"
+        ? ".webp"
+        : ".webp,.mp4";
   return (
     <label className="upload-field">
       <span className="upload-title">{title}</span>
@@ -407,7 +412,7 @@ function EggDrawer({ egg, mode, onClose, onSaved }) {
 
   const save = () => {
     if (!coverFile) {
-      setError("请上传宠物蛋封面（静态 WebP）");
+      setError("请上传宠物蛋封面（静态 PNG）");
       return;
     }
     if (!hatchingFile) {
@@ -445,14 +450,14 @@ function EggDrawer({ egg, mode, onClose, onSaved }) {
           <section className="form-section">
             <div className="section-title">
               <h3>宠物蛋资源</h3>
-              <p>蛋封面为静态 WebP；蛋孵化中为动态 WebP 或 MP4。</p>
+              <p>蛋封面为静态 PNG；蛋孵化中为动态 WebP 或 MP4。</p>
             </div>
             <div className="form-grid">
               <div className="egg-resource-grid">
                 <UploadField
                   title="蛋封面（静态）*"
                   file={coverFile}
-                  accept="WebP"
+                  accept="PNG"
                   onFileChange={setCoverFile}
                 />
                 <UploadField
@@ -885,7 +890,7 @@ export function App() {
                           <td className="id-cell">{item.id}</td>
                           <td>
                             <div className="object-cell">
-                              <span className="file-thumb">WEBP</span>
+                              <span className="file-thumb">PNG</span>
                               <span>
                                 <strong>{item.cover}</strong>
                                 <small>宠物蛋封面资源</small>
