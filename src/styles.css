@@ -201,6 +201,158 @@ label.upload-field:focus-within {
   box-shadow: var(--shadow);
 }
 
+.grant-panel {
+  max-width: 980px;
+}
+
+.grant-body {
+  padding: 24px;
+}
+
+.grant-section + .grant-section {
+  margin-top: 28px;
+}
+
+.grant-user-grid {
+  display: grid;
+  grid-template-columns: minmax(320px, 1fr) 180px;
+  gap: 16px;
+}
+
+.egg-option-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.egg-option {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.egg-option:hover,
+.egg-option.selected {
+  border-color: var(--brand);
+  background: #f6f9ff;
+}
+
+.egg-option input[type="radio"] {
+  width: 16px;
+  min-height: 16px;
+  padding: 0;
+}
+
+.egg-option-main {
+  min-width: 0;
+}
+
+.egg-option-main strong,
+.egg-option-main small {
+  display: block;
+}
+
+.egg-option-main strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.egg-option-main small {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.grant-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.grant-actions .btn {
+  min-width: 132px;
+}
+
+.confirm-mask {
+  position: fixed;
+  z-index: 70;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.48);
+}
+
+.confirm-dialog {
+  position: fixed;
+  z-index: 80;
+  top: 50%;
+  left: 50%;
+  width: min(460px, calc(100vw - 48px));
+  transform: translate(-50%, -50%);
+  padding: 24px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.24);
+}
+
+.confirm-dialog h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.confirm-dialog > p {
+  margin: 8px 0 18px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.confirm-summary {
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.confirm-summary > div {
+  display: grid;
+  grid-template-columns: 82px 1fr;
+  gap: 12px;
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--line-2);
+}
+
+.confirm-summary > div:last-child {
+  border-bottom: 0;
+}
+
+.confirm-summary dt {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.confirm-summary dd {
+  margin: 0;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 20px;
+}
+
 .panel-head {
   min-height: 62px;
   display: flex;

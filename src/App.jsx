@@ -755,6 +755,185 @@ function EggDrawer({ egg, mode, onClose, onSaved }) {
   );
 }
 
+function EggGrantPage({ onSent }) {
+  const [userId, setUserId] = useState("");
+  const [eggId, setEggId] = useState(eggs[0].id);
+  const [quantity, setQuantity] = useState(1);
+  const [remark, setRemark] = useState("");
+  const [error, setError] = useState("");
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const selectedEgg = eggs.find((item) => item.id === eggId) || eggs[0];
+
+  const prepareSend = () => {
+    const normalizedUserId = userId.trim();
+    const numericQuantity = Number(quantity);
+
+    if (!normalizedUserId) {
+      setError("请填写接收宠物蛋的用户ID");
+      return;
+    }
+    if (!Number.isInteger(numericQuantity) || numericQuantity < 1 || numericQuantity > 99) {
+      setError("发放数量需为 1–99 的整数");
+      return;
+    }
+
+    setError("");
+    setConfirmOpen(true);
+  };
+
+  const confirmSend = () => {
+    setConfirmOpen(false);
+    onSent(
+      `已向用户 ${userId.trim()} 发放 ${quantity} 枚 ${selectedEgg.grade} 级宠物蛋`,
+    );
+  };
+
+  return (
+    <>
+      <section className="panel grant-panel">
+        <div className="panel-head">
+          <div>
+            <h2>发送宠物蛋</h2>
+            <p>从已配置的宠物蛋中选择，并发送到指定用户的宠物蛋背包。</p>
+          </div>
+        </div>
+
+        <div className="grant-body">
+          <section className="grant-section">
+            <div className="section-title">
+              <h3>目标用户</h3>
+              <p>宠物蛋将直接进入该用户的宠物蛋背包。</p>
+            </div>
+            <div className="grant-user-grid">
+              <div className="field">
+                <label htmlFor="grant-user-id">用户ID *</label>
+                <input
+                  id="grant-user-id"
+                  value={userId}
+                  onChange={(event) => setUserId(event.target.value)}
+                  placeholder="请输入用户ID"
+                />
+              </div>
+              <div className="field">
+                <label htmlFor="grant-quantity">发放数量 *</label>
+                <input
+                  id="grant-quantity"
+                  type="number"
+                  min="1"
+                  max="99"
+                  value={quantity}
+                  onChange={(event) => setQuantity(event.target.value)}
+                />
+              </div>
+            </div>
+          </section>
+
+          <section className="grant-section">
+            <div className="section-title">
+              <h3>选择宠物蛋</h3>
+              <p>数据来源于宠物蛋配置，发放时使用当前配置资源。</p>
+            </div>
+            <div className="egg-option-list">
+              {eggs.map((item) => (
+                <label
+                  className={`egg-option ${eggId === item.id ? "selected" : ""}`}
+                  key={item.id}
+                >
+                  <input
+                    type="radio"
+                    name="grant-egg"
+                    value={item.id}
+                    checked={eggId === item.id}
+                    onChange={() => setEggId(item.id)}
+                  />
+                  <span className="file-thumb">PNG</span>
+                  <span className="egg-option-main">
+                    <strong>{item.cover}</strong>
+                    <small>
+                      {item.id} · 关联 {item.petCount} 个宠物
+                    </small>
+                  </span>
+                  <span className={`grade grade-${item.grade}`}>
+                    {item.grade}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </section>
+
+          <section className="grant-section">
+            <div className="field">
+              <label htmlFor="grant-remark">发放备注</label>
+              <textarea
+                id="grant-remark"
+                value={remark}
+                onChange={(event) => setRemark(event.target.value)}
+                placeholder="选填，用于说明本次发放原因"
+              />
+            </div>
+          </section>
+
+          <div className="impact-note">
+            发放成功后，宠物蛋会立即进入用户的宠物蛋背包。
+          </div>
+          {error && <div className="form-error">{error}</div>}
+
+          <div className="grant-actions">
+            <button className="btn primary" onClick={prepareSend}>
+              发送宠物蛋
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {confirmOpen && (
+        <>
+          <div className="confirm-mask" onClick={() => setConfirmOpen(false)} />
+          <section
+            className="confirm-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-label="确认发送宠物蛋"
+          >
+            <h3>确认发送宠物蛋</h3>
+            <p>请确认用户与宠物蛋信息，发送后将立即进入用户背包。</p>
+            <dl className="confirm-summary">
+              <div>
+                <dt>用户ID</dt>
+                <dd>{userId.trim()}</dd>
+              </div>
+              <div>
+                <dt>宠物蛋</dt>
+                <dd>
+                  {selectedEgg.id} · {selectedEgg.grade} 级
+                </dd>
+              </div>
+              <div>
+                <dt>数量</dt>
+                <dd>{quantity} 枚</dd>
+              </div>
+              {remark.trim() && (
+                <div>
+                  <dt>备注</dt>
+                  <dd>{remark.trim()}</dd>
+                </div>
+              )}
+            </dl>
+            <div className="confirm-actions">
+              <button className="btn" onClick={() => setConfirmOpen(false)}>
+                取消
+              </button>
+              <button className="btn primary" onClick={confirmSend}>
+                确认发送
+              </button>
+            </div>
+          </section>
+        </>
+      )}
+    </>
+  );
+}
+
 export function App() {
   const [module, setModule] = useState("pet");
   const [keyword, setKeyword] = useState("");
@@ -784,10 +963,23 @@ export function App() {
       listDescription: "同一用户可拥有重复宠物，通过用户宠物ID区分实例。",
       placeholder: "搜索用户ID / 昵称 / 宠物名称 / 用户宠物ID",
     },
+    eggGrant: {
+      title: "宠物蛋发放",
+      description: "向指定用户的宠物蛋背包发送已配置的宠物蛋。",
+      listTitle: "",
+      listDescription: "",
+      placeholder: "",
+    },
   }[module];
 
   const activeRows =
-    module === "pet" ? pets : module === "egg" ? eggs : userPets;
+    module === "pet"
+      ? pets
+      : module === "egg"
+        ? eggs
+        : module === "userPet"
+          ? userPets
+          : [];
   const filteredRows = useMemo(
     () =>
       activeRows.filter((item) => {
@@ -851,6 +1043,15 @@ export function App() {
         >
           用户宠物
         </button>
+        <button
+          className={`nav-item ${module === "eggGrant" ? "active" : ""}`}
+          onClick={() => {
+            setModule("eggGrant");
+            resetFilters();
+          }}
+        >
+          宠物蛋发放
+        </button>
         <div className="sidebar-foot">
           <span>生产环境</span>
           <strong>运营管理员</strong>
@@ -863,7 +1064,7 @@ export function App() {
             <h1>{moduleCopy.title}</h1>
             <p>{moduleCopy.description}</p>
           </div>
-          {module !== "userPet" && (
+          {(module === "pet" || module === "egg") && (
             <div className="top-actions">
               <button
                 className="btn primary"
@@ -882,7 +1083,10 @@ export function App() {
         </header>
 
         <div className="content">
-          <section className="panel">
+          {module === "eggGrant" ? (
+            <EggGrantPage onSent={notify} />
+          ) : (
+            <section className="panel">
             <div className="panel-head">
               <div>
                 <h2>{moduleCopy.listTitle}</h2>
@@ -1105,7 +1309,8 @@ export function App() {
                 </button>
               </div>
             </footer>
-          </section>
+            </section>
+          )}
         </div>
       </main>
 
