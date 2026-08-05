@@ -373,6 +373,40 @@ tbody tr:hover {
   width: 25%;
 }
 
+.user-pet-table {
+  min-width: 1120px;
+}
+
+.user-pet-table th:first-child,
+.user-pet-table td:first-child {
+  width: 138px;
+}
+
+.user-pet-table th:nth-child(2),
+.user-pet-table td:nth-child(2) {
+  width: 164px;
+}
+
+.user-pet-table th:nth-child(3),
+.user-pet-table td:nth-child(3) {
+  width: 132px;
+}
+
+.user-pet-table th:nth-child(4),
+.user-pet-table td:nth-child(4) {
+  width: 76px;
+}
+
+.user-pet-table th:nth-child(6),
+.user-pet-table td:nth-child(6) {
+  width: 126px;
+}
+
+.user-pet-table th:nth-child(7),
+.user-pet-table td:nth-child(7) {
+  width: 138px;
+}
+
 .id-cell {
   color: #30405a;
   font-weight: 750;
@@ -454,6 +488,33 @@ tbody tr:hover {
 .grade-SSS {
   background: #fff1d8;
   color: #9b5f00;
+}
+
+.state-stack {
+  display: grid;
+  justify-items: start;
+  gap: 5px;
+}
+
+.state-pill {
+  display: inline-flex;
+  min-height: 22px;
+  align-items: center;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 760;
+  white-space: nowrap;
+}
+
+.state-pill.on {
+  background: var(--green-bg);
+  color: var(--green);
+}
+
+.state-pill.off {
+  background: #eef1f5;
+  color: #68758a;
 }
 
 .completion strong {
@@ -568,6 +629,11 @@ tbody tr:hover {
   grid-template-rows: auto minmax(0, 1fr) auto;
 }
 
+.user-pet-drawer {
+  width: min(620px, calc(100vw - 280px));
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
 .drawer-head {
   min-height: 86px;
   display: flex;
@@ -671,6 +737,73 @@ tbody tr:hover {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
+}
+
+.user-pet-summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 26px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-2);
+}
+
+.user-pet-summary strong,
+.user-pet-summary small {
+  display: block;
+}
+
+.user-pet-summary small {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.user-pet-form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.setting-list {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.setting-row {
+  min-height: 66px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line-2);
+  cursor: pointer;
+}
+
+.setting-row:last-child {
+  border-bottom: 0;
+}
+
+.setting-row strong,
+.setting-row small {
+  display: block;
+}
+
+.setting-row small {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.setting-row input[type="checkbox"] {
+  width: 18px;
+  min-height: 18px;
+  flex: 0 0 auto;
+  padding: 0;
 }
 
 .half-field {
