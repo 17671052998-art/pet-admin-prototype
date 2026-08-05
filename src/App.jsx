@@ -561,7 +561,7 @@ function EggDrawer({ egg, mode, onClose, onSaved }) {
               <div>
                 <h3>已关联宠物</h3>
                 <p>
-                  用户孵化时从已关联宠物中随机获得；同一宠物允许被用户重复获得。
+                  用户孵化时从已关联宠物中随机获得。
                 </p>
               </div>
               <button className="btn primary" onClick={openPicker}>
