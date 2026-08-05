@@ -55,6 +55,7 @@ const eggs = [
     id: "EGG-SS-001",
     grade: "SS",
     cover: "pet-egg-ss.webp",
+    hatching: "pet-egg-ss-hatching.mp4",
     petIds: ["PET-001", "PET-002"],
     pets: "月曜龙、潮汐鲸",
     petCount: 2,
@@ -64,6 +65,7 @@ const eggs = [
     id: "EGG-S-001",
     grade: "S",
     cover: "pet-egg-s.webp",
+    hatching: "pet-egg-s-hatching.webp",
     petIds: ["PET-002", "PET-003"],
     pets: "潮汐鲸、棉云兔",
     petCount: 2,
@@ -73,6 +75,7 @@ const eggs = [
     id: "EGG-SSS-001",
     grade: "SSS",
     cover: "pet-egg-sss.webp",
+    hatching: "pet-egg-sss-hatching.mp4",
     petIds: ["PET-004"],
     pets: "曜金狮",
     petCount: 1,
@@ -112,8 +115,14 @@ function generateEggId(grade) {
   return `${prefix}${String(nextSequence).padStart(3, "0")}`;
 }
 
-function UploadField({ title, file, accept = "WebP / MP4" }) {
+function UploadField({
+  title,
+  file,
+  accept = "WebP / MP4",
+  onFileChange,
+}) {
   const [fileName, setFileName] = useState(file);
+  const inputAccept = accept === "WebP" ? ".webp" : ".webp,.mp4";
   return (
     <label className="upload-field">
       <span className="upload-title">{title}</span>
@@ -123,10 +132,12 @@ function UploadField({ title, file, accept = "WebP / MP4" }) {
       </span>
       <input
         type="file"
-        accept=".webp,.mp4"
-        onChange={(event) =>
-          setFileName(event.target.files?.[0]?.name || fileName)
-        }
+        accept={inputAccept}
+        onChange={(event) => {
+          const nextFileName = event.target.files?.[0]?.name || fileName;
+          setFileName(nextFileName);
+          onFileChange?.(nextFileName);
+        }}
       />
     </label>
   );
@@ -343,6 +354,8 @@ function PetDrawer({ mode, pet, onClose, onSaved }) {
 
 function EggDrawer({ egg, mode, onClose, onSaved }) {
   const [grade, setGrade] = useState(egg?.grade || "S");
+  const [coverFile, setCoverFile] = useState(egg?.cover || "");
+  const [hatchingFile, setHatchingFile] = useState(egg?.hatching || "");
   const [selectedPetIds, setSelectedPetIds] = useState(
     new Set(egg?.petIds || []),
   );
@@ -393,6 +406,14 @@ function EggDrawer({ egg, mode, onClose, onSaved }) {
   };
 
   const save = () => {
+    if (!coverFile) {
+      setError("请上传宠物蛋封面（静态 WebP）");
+      return;
+    }
+    if (!hatchingFile) {
+      setError("请上传蛋孵化中的动态资源");
+      return;
+    }
     if (!selectedPetIds.size) {
       setError("至少关联 1 个已配置宠物");
       return;
@@ -414,7 +435,7 @@ function EggDrawer({ egg, mode, onClose, onSaved }) {
               {mode === "create" ? "NEW PET EGG" : "PET EGG"}
             </p>
             <h2>{mode === "create" ? "新建宠物蛋配置" : "编辑宠物蛋配置"}</h2>
-            <p>配置封面、品级和可随机孵化的宠物池。</p>
+            <p>配置静态蛋封面、孵化中动态资源、品级和关联宠物池。</p>
           </div>
           <button className="text-btn" onClick={onClose}>
             关闭
@@ -423,15 +444,24 @@ function EggDrawer({ egg, mode, onClose, onSaved }) {
         <div className="drawer-body">
           <section className="form-section">
             <div className="section-title">
-              <h3>基础信息</h3>
-              <p>宠物蛋封面仅支持 WebP。</p>
+              <h3>宠物蛋资源</h3>
+              <p>蛋封面为静态 WebP；蛋孵化中为动态 WebP 或 MP4。</p>
             </div>
             <div className="form-grid">
-              <UploadField
-                title="宠物蛋封面 *"
-                file={egg?.cover || ""}
-                accept="WebP"
-              />
+              <div className="egg-resource-grid">
+                <UploadField
+                  title="蛋封面（静态）*"
+                  file={coverFile}
+                  accept="WebP"
+                  onFileChange={setCoverFile}
+                />
+                <UploadField
+                  title="蛋孵化中（动态）*"
+                  file={hatchingFile}
+                  accept="WebP / MP4"
+                  onFileChange={setHatchingFile}
+                />
+              </div>
               <div className="field half-field">
                 <label htmlFor="egg-grade">宠物蛋品级 *</label>
                 <select
@@ -661,7 +691,7 @@ export function App() {
         const text =
           module === "pet"
             ? `${item.id}${item.name}${item.cover}`
-            : `${item.id}${item.cover}${item.pets}`;
+            : `${item.id}${item.cover}${item.hatching}${item.pets}`;
         return (
           (!keyword || text.toLowerCase().includes(keyword.toLowerCase())) &&
           (grade === "全部" || item.grade === grade)
@@ -720,7 +750,7 @@ export function App() {
             <p>
               {module === "pet"
                 ? "管理宠物基础信息、多语言名称、三星形态和外部展示资源。"
-                : "管理宠物蛋封面、品级和关联宠物池。"}
+                : "管理静态蛋封面、孵化中动态资源、品级和关联宠物池。"}
             </p>
           </div>
           <div className="top-actions">
