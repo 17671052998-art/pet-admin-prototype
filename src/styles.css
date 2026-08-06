@@ -202,7 +202,33 @@ label.upload-field:focus-within {
 }
 
 .grant-panel {
-  max-width: 980px;
+  max-width: 1180px;
+}
+
+.grant-tabs {
+  display: flex;
+  gap: 28px;
+  min-height: 48px;
+  align-items: flex-end;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--line);
+  background: #fff;
+}
+
+.grant-tabs button {
+  height: 48px;
+  padding: 0 2px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: #667389;
+  font-size: 13px;
+  font-weight: 720;
+}
+
+.grant-tabs button.active {
+  border-bottom-color: var(--brand);
+  color: var(--brand);
 }
 
 .grant-body {
@@ -280,6 +306,108 @@ label.upload-field:focus-within {
 
 .grant-actions .btn {
   min-width: 132px;
+}
+
+.record-section {
+  background: #fff;
+}
+
+.record-filters {
+  display: grid;
+  grid-template-columns: minmax(360px, 1fr) 160px auto;
+  gap: 12px;
+  align-items: end;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--line-2);
+  background: var(--surface-2);
+}
+
+.record-summary {
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--line-2);
+}
+
+.record-summary strong {
+  font-size: 14px;
+}
+
+.record-summary p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.record-table {
+  min-width: 1080px;
+}
+
+.record-table th:first-child,
+.record-table td:first-child {
+  width: 158px;
+}
+
+.record-table th:nth-child(2),
+.record-table td:nth-child(2) {
+  width: 138px;
+}
+
+.record-table th:nth-child(3),
+.record-table td:nth-child(3) {
+  width: 250px;
+}
+
+.record-table th:nth-child(4),
+.record-table td:nth-child(4) {
+  width: 70px;
+}
+
+.record-table th:nth-child(5),
+.record-table td:nth-child(5) {
+  width: 170px;
+}
+
+.record-table th:nth-child(6),
+.record-table td:nth-child(6) {
+  width: 142px;
+}
+
+.record-table th:nth-child(7),
+.record-table td:nth-child(7) {
+  width: 112px;
+}
+
+.record-table .grade {
+  flex: 0 0 auto;
+}
+
+.source-pill {
+  display: inline-flex;
+  min-height: 23px;
+  align-items: center;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 780;
+  white-space: nowrap;
+}
+
+.source-pill.activity {
+  background: #eaf8f1;
+  color: #12845a;
+}
+
+.source-pill.admin {
+  background: #edf4ff;
+  color: #2d63c8;
+}
+
+.compact-empty {
+  min-height: 260px;
 }
 
 .confirm-mask {
@@ -1290,7 +1418,8 @@ tbody tr:hover {
 }
 
 @media (max-width: 1200px) {
-  .filters {
+  .filters,
+  .record-filters {
     grid-template-columns: minmax(280px, 1fr) 130px auto;
   }
 

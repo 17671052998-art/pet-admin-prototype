@@ -152,6 +152,61 @@ const userPets = [
   },
 ];
 
+const initialEggAcquisitionRecords = [
+  {
+    id: "EGR-20260805-0001",
+    userId: "10293847",
+    nickname: "XXXX Days",
+    eggId: "EGG-SS-001",
+    grade: "SS",
+    cover: "pet-egg-ss.png",
+    quantity: 1,
+    source: "活动领取",
+    sourceDetail: "月度累计充值 $1,500",
+    operator: "系统自动发放",
+    acquiredAt: "2026-08-05 20:18",
+  },
+  {
+    id: "EGR-20260804-0008",
+    userId: "88756021",
+    nickname: "Luna Voice",
+    eggId: "EGG-S-001",
+    grade: "S",
+    cover: "pet-egg-s.png",
+    quantity: 1,
+    source: "活动领取",
+    sourceDetail: "月度累计充值 $3,000",
+    operator: "系统自动发放",
+    acquiredAt: "2026-08-04 22:06",
+  },
+  {
+    id: "EGR-20260803-0012",
+    userId: "77018432",
+    nickname: "Cloudy",
+    eggId: "EGG-SS-001",
+    grade: "SS",
+    cover: "pet-egg-ss.png",
+    quantity: 2,
+    source: "后台发送",
+    sourceDetail: "活动奖励补发",
+    operator: "运营管理员",
+    acquiredAt: "2026-08-03 16:42",
+  },
+  {
+    id: "EGR-20260802-0006",
+    userId: "66021985",
+    nickname: "Golden Mic",
+    eggId: "EGG-SSS-001",
+    grade: "SSS",
+    cover: "pet-egg-sss.png",
+    quantity: 1,
+    source: "后台发送",
+    sourceDetail: "用户奖励补发",
+    operator: "运营管理员",
+    acquiredAt: "2026-08-02 11:30",
+  },
+];
+
 const formResources = [
   {
     star: "一星",
@@ -725,13 +780,29 @@ function EggDrawer({ egg, mode, onClose, onSaved }) {
 }
 
 function EggGrantPage({ onSent }) {
+  const [activeTab, setActiveTab] = useState("send");
   const [userId, setUserId] = useState("");
   const [eggId, setEggId] = useState(eggs[0].id);
   const [quantity, setQuantity] = useState(1);
   const [remark, setRemark] = useState("");
   const [error, setError] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [records, setRecords] = useState(initialEggAcquisitionRecords);
+  const [recordKeyword, setRecordKeyword] = useState("");
+  const [recordSource, setRecordSource] = useState("全部");
   const selectedEgg = eggs.find((item) => item.id === eggId) || eggs[0];
+  const filteredRecords = useMemo(
+    () =>
+      records.filter((record) => {
+        const searchableText = `${record.id}${record.userId}${record.nickname}${record.eggId}${record.cover}${record.sourceDetail}${record.operator}`;
+        return (
+          (!recordKeyword ||
+            searchableText.toLowerCase().includes(recordKeyword.toLowerCase())) &&
+          (recordSource === "全部" || record.source === recordSource)
+        );
+      }),
+    [recordKeyword, recordSource, records],
+  );
 
   const prepareSend = () => {
     const normalizedUserId = userId.trim();
@@ -751,10 +822,51 @@ function EggGrantPage({ onSent }) {
   };
 
   const confirmSend = () => {
+    const now = new Date();
+    const recordIdTime = now
+      .toISOString()
+      .replace(/\D/g, "")
+      .slice(0, 14);
+    const acquiredAt = new Intl.DateTimeFormat("zh-CN", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    })
+      .format(now)
+      .replaceAll("/", "-");
+
+    setRecords((current) => [
+      {
+        id: `EGR-${recordIdTime}`,
+        userId: userId.trim(),
+        nickname: "后台指定用户",
+        eggId: selectedEgg.id,
+        grade: selectedEgg.grade,
+        cover: selectedEgg.cover,
+        quantity: Number(quantity),
+        source: "后台发送",
+        sourceDetail: remark.trim() || "运营后台手动发放",
+        operator: "运营管理员",
+        acquiredAt,
+      },
+      ...current,
+    ]);
     setConfirmOpen(false);
     onSent(
       `已向用户 ${userId.trim()} 发放 ${quantity} 枚 ${selectedEgg.grade} 级宠物蛋`,
     );
+    setUserId("");
+    setQuantity(1);
+    setRemark("");
+    setActiveTab("records");
+  };
+
+  const resetRecordFilters = () => {
+    setRecordKeyword("");
+    setRecordSource("全部");
   };
 
   return (
@@ -762,97 +874,232 @@ function EggGrantPage({ onSent }) {
       <section className="panel grant-panel">
         <div className="panel-head">
           <div>
-            <h2>发送宠物蛋</h2>
-            <p>从已配置的宠物蛋中选择，并发送到指定用户的宠物蛋背包。</p>
+            <h2>宠物蛋发放管理</h2>
+            <p>发送宠物蛋，并统一查询活动领取和后台发送的获得记录。</p>
           </div>
         </div>
+        <nav className="grant-tabs" aria-label="宠物蛋发放管理分组">
+          <button
+            className={activeTab === "send" ? "active" : ""}
+            onClick={() => setActiveTab("send")}
+          >
+            发送宠物蛋
+          </button>
+          <button
+            className={activeTab === "records" ? "active" : ""}
+            onClick={() => setActiveTab("records")}
+          >
+            宠物蛋获得记录
+          </button>
+        </nav>
 
-        <div className="grant-body">
-          <section className="grant-section">
-            <div className="section-title">
-              <h3>目标用户</h3>
-              <p>宠物蛋将直接进入该用户的宠物蛋背包。</p>
-            </div>
-            <div className="grant-user-grid">
-              <div className="field">
-                <label htmlFor="grant-user-id">用户ID *</label>
-                <input
-                  id="grant-user-id"
-                  value={userId}
-                  onChange={(event) => setUserId(event.target.value)}
-                  placeholder="请输入用户ID"
-                />
+        {activeTab === "send" ? (
+          <div className="grant-body">
+            <section className="grant-section">
+              <div className="section-title">
+                <h3>目标用户</h3>
+                <p>宠物蛋将直接进入该用户的宠物蛋背包。</p>
               </div>
-              <div className="field">
-                <label htmlFor="grant-quantity">发放数量 *</label>
-                <input
-                  id="grant-quantity"
-                  type="number"
-                  min="1"
-                  max="99"
-                  value={quantity}
-                  onChange={(event) => setQuantity(event.target.value)}
-                />
-              </div>
-            </div>
-          </section>
-
-          <section className="grant-section">
-            <div className="section-title">
-              <h3>选择宠物蛋</h3>
-              <p>数据来源于宠物蛋配置，发放时使用当前配置资源。</p>
-            </div>
-            <div className="egg-option-list">
-              {eggs.map((item) => (
-                <label
-                  className={`egg-option ${eggId === item.id ? "selected" : ""}`}
-                  key={item.id}
-                >
+              <div className="grant-user-grid">
+                <div className="field">
+                  <label htmlFor="grant-user-id">用户ID *</label>
                   <input
-                    type="radio"
-                    name="grant-egg"
-                    value={item.id}
-                    checked={eggId === item.id}
-                    onChange={() => setEggId(item.id)}
+                    id="grant-user-id"
+                    value={userId}
+                    onChange={(event) => setUserId(event.target.value)}
+                    placeholder="请输入用户ID"
                   />
-                  <span className="file-thumb">PNG</span>
-                  <span className="egg-option-main">
-                    <strong>{item.cover}</strong>
-                    <small>
-                      {item.id} · 关联 {item.petCount} 个宠物
-                    </small>
-                  </span>
-                  <span className={`grade grade-${item.grade}`}>
-                    {item.grade}
-                  </span>
-                </label>
-              ))}
+                </div>
+                <div className="field">
+                  <label htmlFor="grant-quantity">发放数量 *</label>
+                  <input
+                    id="grant-quantity"
+                    type="number"
+                    min="1"
+                    max="99"
+                    value={quantity}
+                    onChange={(event) => setQuantity(event.target.value)}
+                  />
+                </div>
+              </div>
+            </section>
+
+            <section className="grant-section">
+              <div className="section-title">
+                <h3>选择宠物蛋</h3>
+                <p>数据来源于宠物蛋配置，发放时使用当前配置资源。</p>
+              </div>
+              <div className="egg-option-list">
+                {eggs.map((item) => (
+                  <label
+                    className={`egg-option ${eggId === item.id ? "selected" : ""}`}
+                    key={item.id}
+                  >
+                    <input
+                      type="radio"
+                      name="grant-egg"
+                      value={item.id}
+                      checked={eggId === item.id}
+                      onChange={() => setEggId(item.id)}
+                    />
+                    <span className="file-thumb">PNG</span>
+                    <span className="egg-option-main">
+                      <strong>{item.cover}</strong>
+                      <small>
+                        {item.id} · 关联 {item.petCount} 个宠物
+                      </small>
+                    </span>
+                    <span className={`grade grade-${item.grade}`}>
+                      {item.grade}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </section>
+
+            <section className="grant-section">
+              <div className="field">
+                <label htmlFor="grant-remark">发放备注</label>
+                <textarea
+                  id="grant-remark"
+                  value={remark}
+                  onChange={(event) => setRemark(event.target.value)}
+                  placeholder="选填，用于说明本次发放原因"
+                />
+              </div>
+            </section>
+
+            <div className="impact-note">
+              发放成功后，宠物蛋会立即进入用户的宠物蛋背包，并生成一条后台发送记录。
             </div>
-          </section>
+            {error && <div className="form-error">{error}</div>}
 
-          <section className="grant-section">
-            <div className="field">
-              <label htmlFor="grant-remark">发放备注</label>
-              <textarea
-                id="grant-remark"
-                value={remark}
-                onChange={(event) => setRemark(event.target.value)}
-                placeholder="选填，用于说明本次发放原因"
-              />
+            <div className="grant-actions">
+              <button className="btn primary" onClick={prepareSend}>
+                发送宠物蛋
+              </button>
             </div>
-          </section>
-
-          <div className="impact-note">
-            发放成功后，宠物蛋会立即进入用户的宠物蛋背包。
           </div>
-          {error && <div className="form-error">{error}</div>}
+        ) : (
+          <div className="record-section">
+            <div className="record-filters">
+              <div className="field search-field">
+                <label htmlFor="record-keyword">关键词</label>
+                <input
+                  id="record-keyword"
+                  value={recordKeyword}
+                  onChange={(event) => setRecordKeyword(event.target.value)}
+                  placeholder="搜索记录ID / 用户ID / 宠物蛋ID / 获得说明"
+                />
+              </div>
+              <div className="field">
+                <label htmlFor="record-source">获得方式</label>
+                <select
+                  id="record-source"
+                  value={recordSource}
+                  onChange={(event) => setRecordSource(event.target.value)}
+                >
+                  <option>全部</option>
+                  <option>活动领取</option>
+                  <option>后台发送</option>
+                </select>
+              </div>
+              <div className="filter-actions">
+                <button className="btn" onClick={resetRecordFilters}>
+                  重置
+                </button>
+                <button className="btn primary">查询</button>
+              </div>
+            </div>
 
-          <div className="grant-actions">
-            <button className="btn primary" onClick={prepareSend}>
-              发送宠物蛋
-            </button>
+            <div className="record-summary">
+              <div>
+                <strong>宠物蛋获得记录</strong>
+                <p>仅记录成功进入用户宠物蛋背包的结果。</p>
+              </div>
+              <span className="total">共 {filteredRecords.length} 条</span>
+            </div>
+
+            {filteredRecords.length ? (
+              <div className="table-wrap record-table-wrap">
+                <table className="record-table">
+                  <thead>
+                    <tr>
+                      <th>获得记录ID</th>
+                      <th>用户</th>
+                      <th>宠物蛋奖励</th>
+                      <th>数量</th>
+                      <th>获得方式</th>
+                      <th>获得时间</th>
+                      <th>发放方</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredRecords.map((record) => (
+                      <tr key={record.id}>
+                        <td className="id-cell">{record.id}</td>
+                        <td>
+                          <strong>{record.nickname}</strong>
+                          <small className="block muted">
+                            用户ID {record.userId}
+                          </small>
+                        </td>
+                        <td>
+                          <div className="object-cell">
+                            <span className="file-thumb">PNG</span>
+                            <span>
+                              <strong>{record.eggId}</strong>
+                              <small>{record.cover}</small>
+                            </span>
+                            <span className={`grade grade-${record.grade}`}>
+                              {record.grade}
+                            </span>
+                          </div>
+                        </td>
+                        <td>
+                          <strong>{record.quantity} 枚</strong>
+                        </td>
+                        <td>
+                          <span
+                            className={`source-pill ${record.source === "活动领取" ? "activity" : "admin"}`}
+                          >
+                            {record.source}
+                          </span>
+                          <small className="block muted">
+                            {record.sourceDetail}
+                          </small>
+                        </td>
+                        <td className="muted">{record.acquiredAt}</td>
+                        <td>{record.operator}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="empty-state compact-empty">
+                <strong>没有符合条件的获得记录</strong>
+                <p>请调整关键词或获得方式后重新查询。</p>
+                <button className="btn" onClick={resetRecordFilters}>
+                  重置筛选
+                </button>
+              </div>
+            )}
+
+            <footer className="pagination">
+              <span>第 1 页，共 1 页</span>
+              <div>
+                <button className="btn" disabled>
+                  上一页
+                </button>
+                <button className="page-current">1</button>
+                <button className="btn" disabled>
+                  下一页
+                </button>
+              </div>
+            </footer>
           </div>
-        </div>
+        )}
       </section>
 
       {confirmOpen && (
