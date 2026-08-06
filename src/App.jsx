@@ -18,7 +18,6 @@ const pets = [
     grade: "SS",
     cover: "moon-dragon-cover.webp",
     resource: "6/6",
-    external: "2/2",
     updated: "2026-07-30 18:42",
   },
   {
@@ -27,7 +26,6 @@ const pets = [
     grade: "S",
     cover: "tide-whale-cover.webp",
     resource: "4/6",
-    external: "1/2",
     updated: "2026-07-29 16:15",
   },
   {
@@ -36,7 +34,6 @@ const pets = [
     grade: "A",
     cover: "cloud-rabbit-cover.webp",
     resource: "6/6",
-    external: "2/2",
     updated: "2026-07-25 10:08",
   },
   {
@@ -45,7 +42,6 @@ const pets = [
     grade: "SSS",
     cover: "gold-lion-cover.webp",
     resource: "2/6",
-    external: "0/2",
     updated: "2026-07-22 21:30",
   },
 ];
@@ -265,7 +261,6 @@ function PetDrawer({ mode, pet, onClose, onSaved }) {
             ["base", "基础信息"],
             ["locale", "多语言名称"],
             ["forms", "形态资源"],
-            ["external", "外部展示"],
           ].map(([key, label]) => (
             <button
               key={key}
@@ -381,32 +376,6 @@ function PetDrawer({ mode, pet, onClose, onSaved }) {
                     </div>
                   </article>
                 ))}
-              </div>
-            </section>
-          )}
-
-          {section === "external" && (
-            <section className="form-section">
-              <div className="section-title">
-                <h3>外部展示资源</h3>
-                <p>独立管理宠物在个人主页和资料卡片中的展示资源。</p>
-              </div>
-              <div className="external-grid">
-                <UploadField
-                  title="个人主页展示资源 *"
-                  file="moon-profile-home.webp"
-                />
-                <UploadField
-                  title="资料卡片展示资源 *"
-                  file="moon-profile-card.webp"
-                />
-              </div>
-              <div className="validation-panel">
-                <div>
-                  <strong>完整性校验</strong>
-                  <p>基础信息、多语言名称、6 个形态资源、2 个外部展示资源。</p>
-                </div>
-                <span className="validation-ok">当前配置完整</span>
               </div>
             </section>
           )}
@@ -944,7 +913,7 @@ export function App() {
   const moduleCopy = {
     pet: {
       title: "宠物配置",
-      description: "管理宠物基础信息、多语言名称、三星形态和外部展示资源。",
+      description: "管理宠物基础信息、多语言名称和三星形态资源。",
       listTitle: "宠物列表",
       listDescription: "支持按关键词和品级快速定位配置。",
       placeholder: "搜索宠物名称 / ID / 资源文件",
