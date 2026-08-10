@@ -1154,9 +1154,19 @@ tbody tr:hover {
 
 .resource-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
   padding: 12px;
+}
+
+.resource-grid .upload-field {
+  min-width: 0;
+}
+
+.resource-grid .upload-file {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .section-title-action {

@@ -211,18 +211,21 @@ const formResources = [
   {
     star: "一星",
     level: "初始形态",
+    thumbnail: "moon-1-thumbnail.webp",
     idle: "moon-1-idle.webp",
     interact: "moon-1-interact.mp4",
   },
   {
     star: "二星",
     level: "30",
+    thumbnail: "moon-2-thumbnail.webp",
     idle: "moon-2-idle.webp",
     interact: "moon-2-interact.mp4",
   },
   {
     star: "三星",
     level: "50",
+    thumbnail: "moon-3-thumbnail.webp",
     idle: "moon-3-idle.webp",
     interact: "moon-3-interact.mp4",
   },
@@ -423,6 +426,11 @@ function PetDrawer({ mode, pet, onClose, onSaved }) {
                       </div>
                     </div>
                     <div className="resource-grid">
+                      <UploadField
+                        title="封面缩略图 *"
+                        file={item.thumbnail}
+                        accept="WebP"
+                      />
                       <UploadField title="待机形态资源 *" file={item.idle} />
                       <UploadField
                         title="互动形态资源 *"
