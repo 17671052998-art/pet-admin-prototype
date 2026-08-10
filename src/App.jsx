@@ -16,7 +16,7 @@ const pets = [
     id: "PET-001",
     name: "月曜龙",
     grade: "SS",
-    cover: "moon-dragon-cover.webp",
+    cover: "moon-1-thumbnail.webp",
     resource: "6/6",
     updated: "2026-07-30 18:42",
   },
@@ -24,7 +24,7 @@ const pets = [
     id: "PET-002",
     name: "潮汐鲸",
     grade: "S",
-    cover: "tide-whale-cover.webp",
+    cover: "tide-1-thumbnail.png",
     resource: "4/6",
     updated: "2026-07-29 16:15",
   },
@@ -32,7 +32,7 @@ const pets = [
     id: "PET-003",
     name: "棉云兔",
     grade: "A",
-    cover: "cloud-rabbit-cover.webp",
+    cover: "cloud-1-thumbnail.webp",
     resource: "6/6",
     updated: "2026-07-25 10:08",
   },
@@ -40,7 +40,7 @@ const pets = [
     id: "PET-004",
     name: "曜金狮",
     grade: "SSS",
-    cover: "gold-lion-cover.webp",
+    cover: "gold-1-thumbnail.png",
     resource: "2/6",
     updated: "2026-07-22 21:30",
   },
@@ -254,7 +254,9 @@ function UploadField({
       ? ".png"
       : accept === "WebP"
         ? ".webp"
-        : ".webp,.mp4";
+        : accept === "PNG / WebP"
+          ? ".png,.webp"
+          : ".webp,.mp4";
   return (
     <label className="upload-field">
       <span className="upload-title">{title}</span>
@@ -335,14 +337,9 @@ function PetDrawer({ mode, pet, onClose, onSaved }) {
             <section className="form-section">
               <div className="section-title">
                 <h3>基础信息</h3>
-                <p>用于宠物列表、图册和客户端基础信息展示。</p>
+                <p>用于配置宠物名称和品级；展示封面读取对应形态缩略图。</p>
               </div>
               <div className="form-grid">
-                <UploadField
-                  title="宠物封面 *"
-                  file={pet?.cover || ""}
-                  accept="WebP"
-                />
                 <div className="field">
                   <label htmlFor="pet-name">宠物名称 *</label>
                   <input
@@ -429,7 +426,7 @@ function PetDrawer({ mode, pet, onClose, onSaved }) {
                       <UploadField
                         title="封面缩略图 *"
                         file={item.thumbnail}
-                        accept="WebP"
+                        accept="PNG / WebP"
                       />
                       <UploadField title="待机形态资源 *" file={item.idle} />
                       <UploadField
@@ -1370,7 +1367,11 @@ export function App() {
                           <td className="id-cell">{item.id}</td>
                           <td>
                             <div className="object-cell">
-                              <span className="file-thumb">WEBP</span>
+                              <span className="file-thumb">
+                                {item.cover.toLowerCase().endsWith(".png")
+                                  ? "PNG"
+                                  : "WEBP"}
+                              </span>
                               <span>
                                 <strong>{item.name}</strong>
                                 <small>{item.cover}</small>
