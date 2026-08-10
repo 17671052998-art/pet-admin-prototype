@@ -163,7 +163,7 @@ const initialEggAcquisitionRecords = [
     quantity: 1,
     source: "活动领取",
     sourceDetail: "月度累计充值 $1,500",
-    operator: "系统自动发放",
+    operator: "系统自动发送",
     acquiredAt: "2026-08-05 20:18",
   },
   {
@@ -176,7 +176,7 @@ const initialEggAcquisitionRecords = [
     quantity: 1,
     source: "活动领取",
     sourceDetail: "月度累计充值 $3,000",
-    operator: "系统自动发放",
+    operator: "系统自动发送",
     acquiredAt: "2026-08-04 22:06",
   },
   {
@@ -818,7 +818,7 @@ function EggGrantPage({ onSent }) {
       return;
     }
     if (!Number.isInteger(numericQuantity) || numericQuantity < 1 || numericQuantity > 99) {
-      setError("发放数量需为 1–99 的整数");
+      setError("发送数量需为 1–99 的整数");
       return;
     }
 
@@ -853,7 +853,7 @@ function EggGrantPage({ onSent }) {
         cover: selectedEgg.cover,
         quantity: Number(quantity),
         source: "后台发送",
-        sourceDetail: remark.trim() || "运营后台手动发放",
+        sourceDetail: remark.trim() || "运营后台手动发送",
         operator: "运营管理员",
         acquiredAt,
       },
@@ -861,7 +861,7 @@ function EggGrantPage({ onSent }) {
     ]);
     setConfirmOpen(false);
     onSent(
-      `已向用户 ${userId.trim()} 发放 ${quantity} 枚 ${selectedEgg.grade} 级宠物蛋`,
+      `已向用户 ${userId.trim()} 发送 ${quantity} 枚 ${selectedEgg.grade} 级宠物蛋`,
     );
     setUserId("");
     setQuantity(1);
@@ -879,11 +879,11 @@ function EggGrantPage({ onSent }) {
       <section className="panel grant-panel">
         <div className="panel-head">
           <div>
-            <h2>宠物蛋发放管理</h2>
+            <h2>宠物蛋发送管理</h2>
             <p>发送宠物蛋，并统一查询活动领取和后台发送的获得记录。</p>
           </div>
         </div>
-        <nav className="grant-tabs" aria-label="宠物蛋发放管理分组">
+        <nav className="grant-tabs" aria-label="宠物蛋发送管理分组">
           <button
             className={activeTab === "send" ? "active" : ""}
             onClick={() => setActiveTab("send")}
@@ -916,7 +916,7 @@ function EggGrantPage({ onSent }) {
                   />
                 </div>
                 <div className="field">
-                  <label htmlFor="grant-quantity">发放数量 *</label>
+                  <label htmlFor="grant-quantity">发送数量 *</label>
                   <input
                     id="grant-quantity"
                     type="number"
@@ -932,7 +932,7 @@ function EggGrantPage({ onSent }) {
             <section className="grant-section">
               <div className="section-title">
                 <h3>选择宠物蛋</h3>
-                <p>数据来源于宠物蛋配置，发放时使用当前配置资源。</p>
+                <p>数据来源于宠物蛋配置，发送时使用当前配置资源。</p>
               </div>
               <div className="egg-option-list">
                 {eggs.map((item) => (
@@ -964,18 +964,18 @@ function EggGrantPage({ onSent }) {
 
             <section className="grant-section">
               <div className="field">
-                <label htmlFor="grant-remark">发放备注</label>
+                <label htmlFor="grant-remark">发送备注</label>
                 <textarea
                   id="grant-remark"
                   value={remark}
                   onChange={(event) => setRemark(event.target.value)}
-                  placeholder="选填，用于说明本次发放原因"
+                  placeholder="选填，用于说明本次发送原因"
                 />
               </div>
             </section>
 
             <div className="impact-note">
-              发放成功后，宠物蛋会立即进入用户的宠物蛋背包，并生成一条后台发送记录。
+              发送成功后，宠物蛋会立即进入用户的宠物蛋背包，并生成一条后台发送记录。
             </div>
             {error && <div className="form-error">{error}</div>}
 
@@ -1036,7 +1036,7 @@ function EggGrantPage({ onSent }) {
                       <th>数量</th>
                       <th>获得方式</th>
                       <th>获得时间</th>
-                      <th>发放方</th>
+                      <th>发送方</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1185,7 +1185,7 @@ export function App() {
       placeholder: "搜索用户ID / 昵称 / 宠物名称 / 用户宠物ID",
     },
     eggGrant: {
-      title: "宠物蛋发放",
+      title: "宠物蛋发送",
       description: "向指定用户的宠物蛋背包发送已配置的宠物蛋。",
       listTitle: "",
       listDescription: "",
@@ -1271,7 +1271,7 @@ export function App() {
             resetFilters();
           }}
         >
-          宠物蛋发放
+          宠物蛋发送
         </button>
         <div className="sidebar-foot">
           <span>生产环境</span>
