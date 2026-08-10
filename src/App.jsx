@@ -17,7 +17,7 @@ const pets = [
     name: "月曜龙",
     grade: "SS",
     cover: "moon-1-thumbnail.webp",
-    resource: "6/6",
+    resource: "12/12",
     updated: "2026-07-30 18:42",
   },
   {
@@ -25,7 +25,7 @@ const pets = [
     name: "潮汐鲸",
     grade: "S",
     cover: "tide-1-thumbnail.png",
-    resource: "4/6",
+    resource: "8/12",
     updated: "2026-07-29 16:15",
   },
   {
@@ -33,7 +33,7 @@ const pets = [
     name: "棉云兔",
     grade: "A",
     cover: "cloud-1-thumbnail.webp",
-    resource: "6/6",
+    resource: "12/12",
     updated: "2026-07-25 10:08",
   },
   {
@@ -41,7 +41,7 @@ const pets = [
     name: "曜金狮",
     grade: "SSS",
     cover: "gold-1-thumbnail.png",
-    resource: "2/6",
+    resource: "4/12",
     updated: "2026-07-22 21:30",
   },
 ];
@@ -212,22 +212,28 @@ const formResources = [
     star: "一星",
     level: "初始形态",
     thumbnail: "moon-1-thumbnail.webp",
-    idle: "moon-1-idle.webp",
-    interact: "moon-1-interact.mp4",
+    clientIdle: "moon-1-idle.mp4",
+    clientInteract: "moon-1-interact.mp4",
+    h5Idle: "moon-1-idle.webp",
+    h5Interact: "moon-1-interact.webp",
   },
   {
     star: "二星",
     level: "30",
     thumbnail: "moon-2-thumbnail.webp",
-    idle: "moon-2-idle.webp",
-    interact: "moon-2-interact.mp4",
+    clientIdle: "moon-2-idle.mp4",
+    clientInteract: "moon-2-interact.mp4",
+    h5Idle: "moon-2-idle.webp",
+    h5Interact: "moon-2-interact.webp",
   },
   {
     star: "三星",
     level: "50",
     thumbnail: "moon-3-thumbnail.webp",
-    idle: "moon-3-idle.webp",
-    interact: "moon-3-interact.mp4",
+    clientIdle: "moon-3-idle.mp4",
+    clientInteract: "moon-3-interact.mp4",
+    h5Idle: "moon-3-idle.webp",
+    h5Interact: "moon-3-interact.webp",
   },
 ];
 
@@ -254,6 +260,8 @@ function UploadField({
       ? ".png"
       : accept === "WebP"
         ? ".webp"
+        : accept === "MP4"
+          ? ".mp4"
         : accept === "PNG / WebP"
           ? ".png,.webp"
           : ".webp,.mp4";
@@ -402,7 +410,7 @@ function PetDrawer({ mode, pet, onClose, onSaved }) {
               <div className="section-title">
                 <h3>三星形态资源</h3>
                 <p>
-                  形态按进化等级解锁；等级需递增且不得超过宠物等级上限 100。
+                  形态按进化等级解锁；每个形态分别配置客户端 MP4 与 H5 WebP 资源。
                 </p>
               </div>
               <div className="form-resource-list">
@@ -428,10 +436,33 @@ function PetDrawer({ mode, pet, onClose, onSaved }) {
                         file={item.thumbnail}
                         accept="PNG / WebP"
                       />
-                      <UploadField title="待机形态资源 *" file={item.idle} />
+                      <div className="resource-platform-heading">
+                        <strong>客户端资源</strong>
+                        <span>仅支持 MP4</span>
+                      </div>
                       <UploadField
-                        title="互动形态资源 *"
-                        file={item.interact}
+                        title="客户端待机资源 *"
+                        file={item.clientIdle}
+                        accept="MP4"
+                      />
+                      <UploadField
+                        title="客户端互动资源 *"
+                        file={item.clientInteract}
+                        accept="MP4"
+                      />
+                      <div className="resource-platform-heading">
+                        <strong>H5 资源</strong>
+                        <span>仅支持 WebP</span>
+                      </div>
+                      <UploadField
+                        title="H5 待机资源 *"
+                        file={item.h5Idle}
+                        accept="WebP"
+                      />
+                      <UploadField
+                        title="H5 互动资源 *"
+                        file={item.h5Interact}
+                        accept="WebP"
                       />
                     </div>
                   </article>
@@ -740,7 +771,7 @@ function EggDrawer({ egg, mode, onClose, onSaved }) {
                           <td>
                             <span
                               className={
-                                petItem.resource === "6/6"
+                                petItem.resource === "12/12"
                                   ? "complete"
                                   : "incomplete"
                               }

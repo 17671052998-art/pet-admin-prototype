@@ -1154,9 +1154,32 @@ tbody tr:hover {
 
 .resource-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   padding: 12px;
+}
+
+.resource-grid > .upload-field:first-child,
+.resource-platform-heading {
+  grid-column: 1 / -1;
+}
+
+.resource-platform-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 2px 2px 0;
+}
+
+.resource-platform-heading strong {
+  color: #334155;
+  font-size: 12px;
+}
+
+.resource-platform-heading span {
+  color: var(--muted);
+  font-size: 11px;
 }
 
 .resource-grid .upload-field {
