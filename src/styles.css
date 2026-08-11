@@ -1592,7 +1592,32 @@ tbody tr:hover {
 .activity-form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
+  gap: 16px 18px;
+  align-items: start;
+}
+
+.activity-form-grid .field {
+  grid-template-rows: 18px 38px minmax(34px, auto);
+  align-content: start;
+  align-self: start;
+}
+
+.activity-form-grid .field label {
+  display: flex;
+  align-items: center;
+  min-height: 18px;
+  line-height: 18px;
+}
+
+.activity-form-grid .field input,
+.activity-form-grid .field select {
+  height: 38px;
+  min-height: 38px;
+}
+
+.activity-form-grid .field small {
+  min-height: 34px;
+  line-height: 17px;
 }
 
 .activity-tier-list {

@@ -1426,6 +1426,7 @@ function ActivityDrawer({
                   onChange={(event) => setName(event.target.value)}
                   placeholder="请输入后台活动名称"
                 />
+                <small>仅用于后台识别和活动列表展示。</small>
               </div>
               <div className="field">
                 <label htmlFor="activity-type">活动类型 *</label>
