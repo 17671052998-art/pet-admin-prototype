@@ -79,6 +79,29 @@ const eggs = [
   },
 ];
 
+const initialRechargeActivities = [
+  {
+    key: "PET_RECHARGE_MONTHLY",
+    name: "充值送宠物",
+    cycle: "月度累计",
+    resetRule: "每月1日 00:00",
+    walletLink: "app://wallet/recharge",
+    tiers: [
+      {
+        id: "TIER-01",
+        threshold: 1000,
+        rewards: [{ eggId: "EGG-S-001", quantity: 1 }],
+      },
+      {
+        id: "TIER-02",
+        threshold: 1700,
+        rewards: [{ eggId: "EGG-SS-001", quantity: 1 }],
+      },
+    ],
+    updated: "2026-08-11 10:30",
+  },
+];
+
 const userPets = [
   {
     id: "UPET-10293847-001",
@@ -162,7 +185,7 @@ const initialEggAcquisitionRecords = [
     cover: "pet-egg-ss.png",
     quantity: 1,
     source: "活动领取",
-    sourceDetail: "月度累计充值 $1,500",
+    sourceDetail: "月度累计充值 $1,000",
     operator: "系统自动发送",
     acquiredAt: "2026-08-05 20:18",
   },
@@ -175,7 +198,7 @@ const initialEggAcquisitionRecords = [
     cover: "pet-egg-s.png",
     quantity: 1,
     source: "活动领取",
-    sourceDetail: "月度累计充值 $3,000",
+    sourceDetail: "月度累计充值 $1,700",
     operator: "系统自动发送",
     acquiredAt: "2026-08-04 22:06",
   },
@@ -1186,6 +1209,501 @@ function EggGrantPage({ onSent }) {
   );
 }
 
+function RechargeActivityDrawer({
+  activity,
+  mode,
+  existingKeys,
+  onClose,
+  onSaved,
+}) {
+  const [activityKey, setActivityKey] = useState(activity?.key || "");
+  const [name, setName] = useState(activity?.name || "");
+  const [walletLink, setWalletLink] = useState(
+    activity?.walletLink || "app://wallet/recharge",
+  );
+  const [tiers, setTiers] = useState(() => {
+    const source = activity?.tiers?.length
+      ? activity.tiers
+      : [{ id: "TIER-01", threshold: "", rewards: [] }];
+    return source.map((tier) => ({
+      ...tier,
+      rewards: tier.rewards.map((reward) => ({ ...reward })),
+      draftEggId: eggs[0].id,
+      draftQuantity: 1,
+    }));
+  });
+  const [error, setError] = useState("");
+
+  const updateTier = (tierId, changes) => {
+    setTiers((current) =>
+      current.map((tier) =>
+        tier.id === tierId ? { ...tier, ...changes } : tier,
+      ),
+    );
+  };
+
+  const addTier = () => {
+    setTiers((current) => {
+      const lastThreshold = Number(current.at(-1)?.threshold) || 0;
+      const nextIndex = current.length + 1;
+      return [
+        ...current,
+        {
+          id: `TIER-${String(nextIndex).padStart(2, "0")}-${Date.now()}`,
+          threshold: lastThreshold ? lastThreshold + 500 : "",
+          rewards: [],
+          draftEggId: eggs[0].id,
+          draftQuantity: 1,
+        },
+      ];
+    });
+  };
+
+  const removeTier = (tierId) => {
+    setTiers((current) => current.filter((tier) => tier.id !== tierId));
+  };
+
+  const addEggReward = (tierId) => {
+    const targetTier = tiers.find((tier) => tier.id === tierId);
+    const quantity = Number(targetTier?.draftQuantity);
+    if (!Number.isInteger(quantity) || quantity < 1 || quantity > 99) {
+      setError("宠物蛋数量需为 1–99 的整数");
+      return;
+    }
+    setTiers((current) =>
+      current.map((tier) => {
+        if (tier.id !== tierId) return tier;
+        const existingReward = tier.rewards.find(
+          (reward) => reward.eggId === tier.draftEggId,
+        );
+        const rewards = existingReward
+          ? tier.rewards.map((reward) =>
+              reward.eggId === tier.draftEggId
+                ? { ...reward, quantity: reward.quantity + quantity }
+                : reward,
+            )
+          : [
+              ...tier.rewards,
+              { eggId: tier.draftEggId, quantity },
+            ];
+        return { ...tier, rewards, draftQuantity: 1 };
+      }),
+    );
+    setError("");
+  };
+
+  const removeEggReward = (tierId, eggId) => {
+    setTiers((current) =>
+      current.map((tier) =>
+        tier.id === tierId
+          ? {
+              ...tier,
+              rewards: tier.rewards.filter((reward) => reward.eggId !== eggId),
+            }
+          : tier,
+      ),
+    );
+  };
+
+  const save = () => {
+    const normalizedKey = activityKey.trim().toUpperCase();
+    if (!normalizedKey || !/^[A-Z0-9_]+$/.test(normalizedKey)) {
+      setError("活动 Key 仅支持大写字母、数字和下划线");
+      return;
+    }
+    if (mode === "create" && existingKeys.includes(normalizedKey)) {
+      setError("活动 Key 已存在，请更换后保存");
+      return;
+    }
+    if (!name.trim()) {
+      setError("请填写活动名称");
+      return;
+    }
+    if (!walletLink.trim()) {
+      setError("请填写客户端钱包跳转链接");
+      return;
+    }
+    if (!tiers.length) {
+      setError("请至少添加一个充值阶梯");
+      return;
+    }
+    const thresholds = tiers.map((tier) => Number(tier.threshold));
+    if (thresholds.some((threshold) => !threshold || threshold <= 0)) {
+      setError("请填写大于 0 的累计充值门槛");
+      return;
+    }
+    if (thresholds.some((threshold, index) => index && threshold <= thresholds[index - 1])) {
+      setError("充值门槛需按阶梯严格递增");
+      return;
+    }
+    if (tiers.some((tier) => !tier.rewards.length)) {
+      setError("每个充值阶梯至少添加一个宠物蛋奖励");
+      return;
+    }
+
+    onSaved({
+      key: normalizedKey,
+      name: name.trim(),
+      cycle: "月度累计",
+      resetRule: "每月1日 00:00",
+      walletLink: walletLink.trim(),
+      tiers: tiers.map(({ id, threshold, rewards }) => ({
+        id,
+        threshold: Number(threshold),
+        rewards,
+      })),
+      updated: "2026-08-11 刚刚",
+    });
+  };
+
+  return (
+    <>
+      <div className="mask" onClick={onClose} />
+      <aside className="drawer activity-drawer" aria-label="充值活动配置抽屉">
+        <header className="drawer-head">
+          <div>
+            <p className="eyebrow">
+              {mode === "create" ? "NEW RECHARGE ACTIVITY" : activity.key}
+            </p>
+            <h2>{mode === "create" ? "新建充值活动" : `编辑 ${activity.name}`}</h2>
+            <p>配置活动识别 Key、月度重置规则、充值阶梯和宠物蛋奖励。</p>
+          </div>
+          <button className="text-btn" onClick={onClose}>关闭</button>
+        </header>
+
+        <div className="drawer-body">
+          <section className="form-section">
+            <div className="section-title">
+              <h3>基础信息</h3>
+              <p>活动 Key 用于客户端和服务端识别，创建后不可修改。</p>
+            </div>
+            <div className="activity-form-grid">
+              <div className="field">
+                <label htmlFor="activity-key">活动 Key *</label>
+                <input
+                  id="activity-key"
+                  value={activityKey}
+                  disabled={mode === "edit"}
+                  onChange={(event) => setActivityKey(event.target.value.toUpperCase())}
+                  placeholder="例如 PET_RECHARGE_MONTHLY"
+                />
+                <small>仅支持大写字母、数字和下划线，保存后不可修改。</small>
+              </div>
+              <div className="field">
+                <label htmlFor="activity-name">活动名称 *</label>
+                <input
+                  id="activity-name"
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  placeholder="请输入后台活动名称"
+                />
+              </div>
+              <div className="field">
+                <label htmlFor="activity-cycle">累计周期</label>
+                <input id="activity-cycle" value="月度累计" disabled />
+              </div>
+              <div className="field">
+                <label htmlFor="activity-reset">数据重置时间</label>
+                <input id="activity-reset" value="每月1日 00:00" disabled />
+              </div>
+              <div className="field activity-link-field">
+                <label htmlFor="activity-wallet-link">底部按钮跳转链接 *</label>
+                <input
+                  id="activity-wallet-link"
+                  value={walletLink}
+                  onChange={(event) => setWalletLink(event.target.value)}
+                  placeholder="请输入客户端钱包页面链接"
+                />
+                <small>客户端点击活动页底部“去充值”后跳转至该地址。</small>
+              </div>
+            </div>
+          </section>
+
+          <section className="form-section">
+            <div className="section-title section-title-action">
+              <div>
+                <h3>充值阶梯</h3>
+                <p>门槛按每月累计充值金额计算，阶梯金额必须依次递增。</p>
+              </div>
+              <button className="btn primary" onClick={addTier}>添加阶梯</button>
+            </div>
+
+            <div className="activity-tier-list">
+              {tiers.map((tier, index) => (
+                <article className="activity-tier-card" key={tier.id}>
+                  <div className="activity-tier-head">
+                    <div>
+                      <span className="tier-number">{index + 1}</span>
+                      <strong>充值阶梯 {index + 1}</strong>
+                    </div>
+                    <button
+                      className="remove-btn"
+                      disabled={tiers.length === 1}
+                      onClick={() => removeTier(tier.id)}
+                    >
+                      移除阶梯
+                    </button>
+                  </div>
+
+                  <div className="tier-threshold-row">
+                    <div className="field">
+                      <label htmlFor={`tier-threshold-${tier.id}`}>累计充值门槛（美元）*</label>
+                      <input
+                        id={`tier-threshold-${tier.id}`}
+                        type="number"
+                        min="1"
+                        value={tier.threshold}
+                        onChange={(event) =>
+                          updateTier(tier.id, { threshold: event.target.value })
+                        }
+                        placeholder="请输入金额"
+                      />
+                    </div>
+                    <div className="tier-preview">
+                      客户端展示：累计充值 ${Number(tier.threshold || 0).toLocaleString()}
+                    </div>
+                  </div>
+
+                  <div className="tier-reward-section">
+                    <div className="tier-reward-title">
+                      <strong>宠物蛋奖励</strong>
+                      <span>从宠物蛋配置中选择，可添加多个奖励。</span>
+                    </div>
+                    {tier.rewards.length ? (
+                      <div className="activity-reward-list">
+                        {tier.rewards.map((reward) => {
+                          const egg = eggs.find((item) => item.id === reward.eggId);
+                          return (
+                            <div className="activity-reward-row" key={reward.eggId}>
+                              <span className="file-thumb">PNG</span>
+                              <span className="activity-reward-main">
+                                <strong>{egg?.id}</strong>
+                                <small>{egg?.cover}</small>
+                              </span>
+                              <span className={`grade grade-${egg?.grade}`}>
+                                {egg?.grade}
+                              </span>
+                              <strong>×{reward.quantity}</strong>
+                              <button
+                                className="remove-btn"
+                                onClick={() => removeEggReward(tier.id, reward.eggId)}
+                              >
+                                移除
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="tier-reward-empty">暂未添加宠物蛋奖励</div>
+                    )}
+
+                    <div className="reward-add-row">
+                      <div className="field">
+                        <label htmlFor={`reward-egg-${tier.id}`}>宠物蛋配置</label>
+                        <select
+                          id={`reward-egg-${tier.id}`}
+                          value={tier.draftEggId}
+                          onChange={(event) =>
+                            updateTier(tier.id, { draftEggId: event.target.value })
+                          }
+                        >
+                          {eggs.map((egg) => (
+                            <option value={egg.id} key={egg.id}>
+                              {egg.id} · {egg.grade}级 · {egg.cover}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="field reward-quantity-field">
+                        <label htmlFor={`reward-quantity-${tier.id}`}>数量</label>
+                        <input
+                          id={`reward-quantity-${tier.id}`}
+                          type="number"
+                          min="1"
+                          max="99"
+                          value={tier.draftQuantity}
+                          onChange={(event) =>
+                            updateTier(tier.id, { draftQuantity: event.target.value })
+                          }
+                        />
+                      </div>
+                      <button
+                        className="btn"
+                        onClick={() => addEggReward(tier.id)}
+                      >
+                        添加宠物蛋
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <div className="impact-note">
+            每月1日00:00仅重置用户累计充值进度和任务领取状态，已进入背包的奖励不会回收。
+          </div>
+          {error && <div className="form-error">{error}</div>}
+        </div>
+
+        <footer className="drawer-foot">
+          <span>保存后客户端将按活动 Key 读取最新阶梯与奖励配置</span>
+          <div>
+            <button className="btn" onClick={onClose}>取消</button>
+            <button className="btn primary" onClick={save}>保存配置</button>
+          </div>
+        </footer>
+      </aside>
+    </>
+  );
+}
+
+function RechargeActivityPage({ onNotify }) {
+  const [activities, setActivities] = useState(initialRechargeActivities);
+  const [keyword, setKeyword] = useState("");
+  const [activityDrawer, setActivityDrawer] = useState(null);
+  const filteredActivities = activities.filter((activity) =>
+    `${activity.key}${activity.name}${activity.walletLink}`
+      .toLowerCase()
+      .includes(keyword.toLowerCase()),
+  );
+
+  const saveActivity = (nextActivity) => {
+    setActivities((current) => {
+      const exists = current.some((item) => item.key === nextActivity.key);
+      return exists
+        ? current.map((item) =>
+            item.key === nextActivity.key ? nextActivity : item,
+          )
+        : [nextActivity, ...current];
+    });
+    setActivityDrawer(null);
+    onNotify(
+      activityDrawer?.mode === "create"
+        ? "充值活动已创建"
+        : "充值活动配置已保存",
+    );
+  };
+
+  return (
+    <>
+      <section className="panel activity-panel">
+        <div className="panel-head">
+          <div>
+            <h2>充值活动列表</h2>
+            <p>支持通过唯一活动 Key 配置多个充值活动及其阶梯宠物蛋奖励。</p>
+          </div>
+          <button
+            className="btn primary"
+            onClick={() => setActivityDrawer({ mode: "create", item: null })}
+          >
+            新建充值活动
+          </button>
+        </div>
+
+        <div className="activity-filters">
+          <div className="field search-field">
+            <label htmlFor="activity-keyword">关键词</label>
+            <input
+              id="activity-keyword"
+              value={keyword}
+              onChange={(event) => setKeyword(event.target.value)}
+              placeholder="搜索活动 Key / 活动名称 / 钱包链接"
+            />
+          </div>
+          <div className="filter-actions">
+            <button className="btn" onClick={() => setKeyword("")}>重置</button>
+            <button className="btn primary">查询</button>
+          </div>
+        </div>
+
+        {filteredActivities.length ? (
+          <div className="table-wrap">
+            <table className="activity-table">
+              <thead>
+                <tr>
+                  <th>活动 Key</th>
+                  <th>活动名称</th>
+                  <th>累计周期</th>
+                  <th>充值阶梯</th>
+                  <th>宠物蛋奖励</th>
+                  <th>钱包跳转</th>
+                  <th>更新时间</th>
+                  <th className="action-col">操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredActivities.map((activity) => {
+                  const rewardCount = activity.tiers.reduce(
+                    (total, tier) =>
+                      total + tier.rewards.reduce((sum, reward) => sum + reward.quantity, 0),
+                    0,
+                  );
+                  return (
+                    <tr key={activity.key}>
+                      <td className="activity-key-cell">{activity.key}</td>
+                      <td><strong>{activity.name}</strong></td>
+                      <td>
+                        <strong>{activity.cycle}</strong>
+                        <small className="block muted">{activity.resetRule}</small>
+                      </td>
+                      <td>
+                        <strong>{activity.tiers.length} 个</strong>
+                        <small className="block muted">
+                          {activity.tiers.map((tier) => `$${tier.threshold.toLocaleString()}`).join(" / ")}
+                        </small>
+                      </td>
+                      <td><strong>{rewardCount} 枚</strong></td>
+                      <td className="muted activity-link-cell">{activity.walletLink}</td>
+                      <td className="muted">{activity.updated}</td>
+                      <td>
+                        <button
+                          className="link-btn"
+                          onClick={() =>
+                            setActivityDrawer({ mode: "edit", item: activity })
+                          }
+                        >
+                          编辑
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="empty-state">
+            <strong>没有符合条件的充值活动</strong>
+            <p>请调整关键词或新建充值活动。</p>
+            <button className="btn" onClick={() => setKeyword("")}>重置筛选</button>
+          </div>
+        )}
+
+        <footer className="pagination">
+          <span>第 1 页，共 1 页</span>
+          <div>
+            <button className="btn" disabled>上一页</button>
+            <button className="page-current">1</button>
+            <button className="btn" disabled>下一页</button>
+          </div>
+        </footer>
+      </section>
+
+      {activityDrawer && (
+        <RechargeActivityDrawer
+          activity={activityDrawer.item}
+          mode={activityDrawer.mode}
+          existingKeys={activities.map((item) => item.key)}
+          onClose={() => setActivityDrawer(null)}
+          onSaved={saveActivity}
+        />
+      )}
+    </>
+  );
+}
+
 export function App() {
   const [module, setModule] = useState("pet");
   const [keyword, setKeyword] = useState("");
@@ -1218,6 +1736,13 @@ export function App() {
     eggGrant: {
       title: "宠物蛋发送",
       description: "向指定用户的宠物蛋背包发送已配置的宠物蛋。",
+      listTitle: "",
+      listDescription: "",
+      placeholder: "",
+    },
+    rechargeActivity: {
+      title: "充值活动配置",
+      description: "通过活动 Key 管理月度累计充值阶梯、宠物蛋奖励和钱包跳转。",
       listTitle: "",
       listDescription: "",
       placeholder: "",
@@ -1304,6 +1829,15 @@ export function App() {
         >
           宠物蛋发送
         </button>
+        <button
+          className={`nav-item ${module === "rechargeActivity" ? "active" : ""}`}
+          onClick={() => {
+            setModule("rechargeActivity");
+            resetFilters();
+          }}
+        >
+          充值活动配置
+        </button>
         <div className="sidebar-foot">
           <span>生产环境</span>
           <strong>运营管理员</strong>
@@ -1337,6 +1871,8 @@ export function App() {
         <div className="content">
           {module === "eggGrant" ? (
             <EggGrantPage onSent={notify} />
+          ) : module === "rechargeActivity" ? (
+            <RechargeActivityPage onNotify={notify} />
           ) : (
             <section className="panel">
             <div className="panel-head">
