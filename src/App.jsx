@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const regions = [
   ["IN", "印度", "Chandra Dragon"],
@@ -17,7 +17,7 @@ const pets = [
     name: "月曜龙",
     grade: "SS",
     cover: "moon-1-thumbnail.webp",
-    resource: "12/12",
+    resource: "6/6",
     updated: "2026-07-30 18:42",
   },
   {
@@ -25,7 +25,7 @@ const pets = [
     name: "潮汐鲸",
     grade: "S",
     cover: "tide-1-thumbnail.png",
-    resource: "8/12",
+    resource: "4/6",
     updated: "2026-07-29 16:15",
   },
   {
@@ -33,7 +33,7 @@ const pets = [
     name: "棉云兔",
     grade: "A",
     cover: "cloud-1-thumbnail.webp",
-    resource: "12/12",
+    resource: "6/6",
     updated: "2026-07-25 10:08",
   },
   {
@@ -41,7 +41,7 @@ const pets = [
     name: "曜金狮",
     grade: "SSS",
     cover: "gold-1-thumbnail.png",
-    resource: "4/12",
+    resource: "2/6",
     updated: "2026-07-22 21:30",
   },
 ];
@@ -237,28 +237,22 @@ const formResources = [
     star: "一星",
     level: "初始形态",
     thumbnail: "moon-1-thumbnail.webp",
-    clientIdle: "moon-1-idle.mp4",
-    clientInteract: "moon-1-interact.mp4",
-    h5Idle: "moon-1-idle.webp",
-    h5Interact: "moon-1-interact.webp",
+    idle: "moon-1-idle.webp",
+    interact: "moon-1-interact.mp4",
   },
   {
     star: "二星",
     level: "30",
     thumbnail: "moon-2-thumbnail.webp",
-    clientIdle: "moon-2-idle.mp4",
-    clientInteract: "moon-2-interact.mp4",
-    h5Idle: "moon-2-idle.webp",
-    h5Interact: "moon-2-interact.webp",
+    idle: "moon-2-idle.mp4",
+    interact: "moon-2-interact.webp",
   },
   {
     star: "三星",
     level: "50",
     thumbnail: "moon-3-thumbnail.webp",
-    clientIdle: "moon-3-idle.mp4",
-    clientInteract: "moon-3-interact.mp4",
-    h5Idle: "moon-3-idle.webp",
-    h5Interact: "moon-3-interact.webp",
+    idle: "moon-3-idle.webp",
+    interact: "moon-3-interact.mp4",
   },
 ];
 
@@ -278,35 +272,84 @@ function UploadField({
   file,
   accept = "WebP / MP4",
   onFileChange,
+  previewable = false,
+  removable = false,
 }) {
   const [fileName, setFileName] = useState(file);
+  const [previewUrl, setPreviewUrl] = useState("");
   const inputAccept =
     accept === "PNG"
       ? ".png"
       : accept === "WebP"
         ? ".webp"
-        : accept === "MP4"
-          ? ".mp4"
         : accept === "PNG / WebP"
           ? ".png,.webp"
           : ".webp,.mp4";
+  const isMp4 = fileName.toLowerCase().endsWith(".mp4");
+
+  useEffect(
+    () => () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    },
+    [previewUrl],
+  );
+
+  const removeFile = () => {
+    setFileName("");
+    setPreviewUrl("");
+    onFileChange?.("");
+  };
+
   return (
-    <label className="upload-field">
-      <span className="upload-title">{title}</span>
-      <span className="upload-file">{fileName || "点击上传资源"}</span>
-      <span className="upload-meta">
-        支持 {accept} · 尺寸与文件大小待确认
-      </span>
-      <input
-        type="file"
-        accept={inputAccept}
-        onChange={(event) => {
-          const nextFileName = event.target.files?.[0]?.name || fileName;
-          setFileName(nextFileName);
-          onFileChange?.(nextFileName);
-        }}
-      />
-    </label>
+    <div
+      className={`upload-field ${previewable && fileName ? "has-preview" : ""} ${removable && fileName ? "has-remove" : ""}`}
+    >
+      <label className="upload-trigger">
+        <span className="upload-title">{title}</span>
+        <span className="upload-file">{fileName || "点击上传资源"}</span>
+        <span className="upload-meta">
+          支持 {accept} · {previewable && fileName ? "悬停预览动画 · " : ""}尺寸与文件大小待确认
+        </span>
+        <input
+          type="file"
+          accept={inputAccept}
+          onChange={(event) => {
+            const nextFile = event.target.files?.[0];
+            if (!nextFile) return;
+            const nextFileName = nextFile.name;
+            setFileName(nextFileName);
+            setPreviewUrl(URL.createObjectURL(nextFile));
+            onFileChange?.(nextFileName);
+          }}
+        />
+      </label>
+
+      {removable && fileName && (
+        <button type="button" className="upload-remove" onClick={removeFile}>
+          移除上传
+        </button>
+      )}
+
+      {previewable && fileName && (
+        <div className="upload-preview" aria-hidden="true">
+          {previewUrl ? (
+            isMp4 ? (
+              <video src={previewUrl} autoPlay muted loop playsInline />
+            ) : (
+              <img src={previewUrl} alt="" />
+            )
+          ) : (
+            <div className="upload-preview-demo">
+              <span className={`preview-orb ${isMp4 ? "mp4" : "webp"}`} />
+              <span className="upload-preview-copy">
+                <strong>{isMp4 ? "MP4" : "WebP"} 动画预览</strong>
+                <small>{fileName}</small>
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -435,7 +478,7 @@ function PetDrawer({ mode, pet, onClose, onSaved }) {
               <div className="section-title">
                 <h3>三星形态资源</h3>
                 <p>
-                  形态按进化等级解锁；每个形态分别配置客户端 MP4 与 H5 WebP 资源。
+                  形态按进化等级解锁；待机与互动资源均支持 WebP / MP4。
                 </p>
               </div>
               <div className="form-resource-list">
@@ -461,33 +504,17 @@ function PetDrawer({ mode, pet, onClose, onSaved }) {
                         file={item.thumbnail}
                         accept="PNG / WebP"
                       />
-                      <div className="resource-platform-heading">
-                        <strong>客户端资源</strong>
-                        <span>仅支持 MP4</span>
-                      </div>
                       <UploadField
-                        title="客户端待机资源 *"
-                        file={item.clientIdle}
-                        accept="MP4"
+                        title="待机形态资源 *"
+                        file={item.idle}
+                        previewable
+                        removable
                       />
                       <UploadField
-                        title="客户端互动资源 *"
-                        file={item.clientInteract}
-                        accept="MP4"
-                      />
-                      <div className="resource-platform-heading">
-                        <strong>H5 资源</strong>
-                        <span>仅支持 WebP</span>
-                      </div>
-                      <UploadField
-                        title="H5 待机资源 *"
-                        file={item.h5Idle}
-                        accept="WebP"
-                      />
-                      <UploadField
-                        title="H5 互动资源 *"
-                        file={item.h5Interact}
-                        accept="WebP"
+                        title="互动形态资源 *"
+                        file={item.interact}
+                        previewable
+                        removable
                       />
                     </div>
                   </article>
@@ -796,7 +823,7 @@ function EggDrawer({ egg, mode, onClose, onSaved }) {
                           <td>
                             <span
                               className={
-                                petItem.resource === "12/12"
+                                petItem.resource === "6/6"
                                   ? "complete"
                                   : "incomplete"
                               }
