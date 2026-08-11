@@ -79,10 +79,15 @@ const eggs = [
   },
 ];
 
-const initialRechargeActivities = [
+const activityTypes = [
+  { value: "recharge", label: "充值活动" },
+];
+
+const initialActivities = [
   {
     key: "PET_RECHARGE_MONTHLY",
     name: "充值送宠物",
+    type: "recharge",
     tiers: [
       {
         id: "TIER-01",
@@ -1206,7 +1211,7 @@ function EggGrantPage({ onSent }) {
   );
 }
 
-function RechargeActivityDrawer({
+function ActivityDrawer({
   activity,
   mode,
   existingKeys,
@@ -1215,6 +1220,9 @@ function RechargeActivityDrawer({
 }) {
   const [activityKey, setActivityKey] = useState(activity?.key || "");
   const [name, setName] = useState(activity?.name || "");
+  const [activityType, setActivityType] = useState(
+    activity?.type || activityTypes[0].value,
+  );
   const [tiers, setTiers] = useState(() => {
     const source = activity?.tiers?.length
       ? activity.tiers
@@ -1313,32 +1321,39 @@ function RechargeActivityDrawer({
       setError("请填写活动名称");
       return;
     }
-    if (!tiers.length) {
-      setError("请至少添加一个充值阶梯");
-      return;
-    }
-    const thresholds = tiers.map((tier) => Number(tier.threshold));
-    if (thresholds.some((threshold) => !threshold || threshold <= 0)) {
-      setError("请填写大于 0 的累计充值门槛");
-      return;
-    }
-    if (thresholds.some((threshold, index) => index && threshold <= thresholds[index - 1])) {
-      setError("充值门槛需按阶梯严格递增");
-      return;
-    }
-    if (tiers.some((tier) => !tier.rewards.length)) {
-      setError("每个充值阶梯至少添加一个宠物蛋奖励");
-      return;
+    if (activityType === "recharge") {
+      if (!tiers.length) {
+        setError("请至少添加一个充值阶梯");
+        return;
+      }
+      const thresholds = tiers.map((tier) => Number(tier.threshold));
+      if (thresholds.some((threshold) => !threshold || threshold <= 0)) {
+        setError("请填写大于 0 的累计充值门槛");
+        return;
+      }
+      if (thresholds.some((threshold, index) => index && threshold <= thresholds[index - 1])) {
+        setError("充值门槛需按阶梯严格递增");
+        return;
+      }
+      if (tiers.some((tier) => !tier.rewards.length)) {
+        setError("每个充值阶梯至少添加一个宠物蛋奖励");
+        return;
+      }
     }
 
     onSaved({
       key: normalizedKey,
       name: name.trim(),
-      tiers: tiers.map(({ id, threshold, rewards }) => ({
-        id,
-        threshold: Number(threshold),
-        rewards,
-      })),
+      type: activityType,
+      ...(activityType === "recharge"
+        ? {
+            tiers: tiers.map(({ id, threshold, rewards }) => ({
+              id,
+              threshold: Number(threshold),
+              rewards,
+            })),
+          }
+        : {}),
       updated: "2026-08-11 刚刚",
     });
   };
@@ -1346,14 +1361,14 @@ function RechargeActivityDrawer({
   return (
     <>
       <div className="mask" onClick={onClose} />
-      <aside className="drawer activity-drawer" aria-label="充值活动配置抽屉">
+      <aside className="drawer activity-drawer" aria-label="活动配置抽屉">
         <header className="drawer-head">
           <div>
             <p className="eyebrow">
-              {mode === "create" ? "NEW RECHARGE ACTIVITY" : activity.key}
+              {mode === "create" ? "NEW ACTIVITY" : activity.key}
             </p>
-            <h2>{mode === "create" ? "新建充值活动" : `编辑 ${activity.name}`}</h2>
-            <p>配置活动识别 Key、充值阶梯和宠物蛋奖励。</p>
+            <h2>{mode === "create" ? "新建活动" : `编辑 ${activity.name}`}</h2>
+            <p>配置活动公共信息，并按活动类型加载对应的规则与奖励。</p>
           </div>
           <button className="text-btn" onClick={onClose}>关闭</button>
         </header>
@@ -1361,8 +1376,8 @@ function RechargeActivityDrawer({
         <div className="drawer-body">
           <section className="form-section">
             <div className="section-title">
-              <h3>基础信息</h3>
-              <p>活动 Key 用于客户端和服务端识别，创建后不可修改。</p>
+              <h3>活动信息</h3>
+              <p>活动 Key 和活动类型用于识别配置结构，创建后不可修改。</p>
             </div>
             <div className="activity-form-grid">
               <div className="field">
@@ -1385,13 +1400,28 @@ function RechargeActivityDrawer({
                   placeholder="请输入后台活动名称"
                 />
               </div>
+              <div className="field">
+                <label htmlFor="activity-type">活动类型 *</label>
+                <select
+                  id="activity-type"
+                  value={activityType}
+                  disabled={mode === "edit"}
+                  onChange={(event) => setActivityType(event.target.value)}
+                >
+                  {activityTypes.map((type) => (
+                    <option value={type.value} key={type.value}>{type.label}</option>
+                  ))}
+                </select>
+                <small>当前已接入充值活动，后续活动类型在此继续扩展。</small>
+              </div>
             </div>
           </section>
 
+          {activityType === "recharge" && (
           <section className="form-section">
             <div className="section-title section-title-action">
               <div>
-                <h3>充值阶梯</h3>
+                <h3>充值活动规则</h3>
                 <p>门槛按每月累计充值金额计算，阶梯金额必须依次递增。</p>
               </div>
               <button className="btn primary" onClick={addTier}>添加阶梯</button>
@@ -1509,12 +1539,13 @@ function RechargeActivityDrawer({
               ))}
             </div>
           </section>
+          )}
 
           {error && <div className="form-error">{error}</div>}
         </div>
 
         <footer className="drawer-foot">
-          <span>保存后客户端将按活动 Key 读取最新阶梯与奖励配置</span>
+          <span>保存后客户端将按活动 Key 和活动类型读取对应配置</span>
           <div>
             <button className="btn" onClick={onClose}>取消</button>
             <button className="btn primary" onClick={save}>保存配置</button>
@@ -1525,14 +1556,17 @@ function RechargeActivityDrawer({
   );
 }
 
-function RechargeActivityPage({ onNotify }) {
-  const [activities, setActivities] = useState(initialRechargeActivities);
+function ActivityConfigPage({ onNotify }) {
+  const [activities, setActivities] = useState(initialActivities);
   const [keyword, setKeyword] = useState("");
+  const [typeFilter, setTypeFilter] = useState("全部");
   const [activityDrawer, setActivityDrawer] = useState(null);
-  const filteredActivities = activities.filter((activity) =>
-    `${activity.key}${activity.name}`
-      .toLowerCase()
-      .includes(keyword.toLowerCase()),
+  const filteredActivities = activities.filter(
+    (activity) =>
+      `${activity.key}${activity.name}`
+        .toLowerCase()
+        .includes(keyword.toLowerCase()) &&
+      (typeFilter === "全部" || activity.type === typeFilter),
   );
 
   const saveActivity = (nextActivity) => {
@@ -1547,8 +1581,8 @@ function RechargeActivityPage({ onNotify }) {
     setActivityDrawer(null);
     onNotify(
       activityDrawer?.mode === "create"
-        ? "充值活动已创建"
-        : "充值活动配置已保存",
+        ? "活动已创建"
+        : "活动配置已保存",
     );
   };
 
@@ -1557,14 +1591,14 @@ function RechargeActivityPage({ onNotify }) {
       <section className="panel activity-panel">
         <div className="panel-head">
           <div>
-            <h2>充值活动列表</h2>
-            <p>支持通过唯一活动 Key 配置多个充值活动及其阶梯宠物蛋奖励。</p>
+            <h2>活动列表</h2>
+            <p>通过唯一活动 Key 和活动类型统一管理不同活动的规则与奖励。</p>
           </div>
           <button
             className="btn primary"
             onClick={() => setActivityDrawer({ mode: "create", item: null })}
           >
-            新建充值活动
+            新建活动
           </button>
         </div>
 
@@ -1578,8 +1612,29 @@ function RechargeActivityPage({ onNotify }) {
               placeholder="搜索活动 Key / 活动名称"
             />
           </div>
+          <div className="field">
+            <label htmlFor="activity-type-filter">活动类型</label>
+            <select
+              id="activity-type-filter"
+              value={typeFilter}
+              onChange={(event) => setTypeFilter(event.target.value)}
+            >
+              <option value="全部">全部</option>
+              {activityTypes.map((type) => (
+                <option value={type.value} key={type.value}>{type.label}</option>
+              ))}
+            </select>
+          </div>
           <div className="filter-actions">
-            <button className="btn" onClick={() => setKeyword("")}>重置</button>
+            <button
+              className="btn"
+              onClick={() => {
+                setKeyword("");
+                setTypeFilter("全部");
+              }}
+            >
+              重置
+            </button>
             <button className="btn primary">查询</button>
           </div>
         </div>
@@ -1591,7 +1646,8 @@ function RechargeActivityPage({ onNotify }) {
                 <tr>
                   <th>活动 Key</th>
                   <th>活动名称</th>
-                  <th>充值阶梯</th>
+                  <th>活动类型</th>
+                  <th>活动规则</th>
                   <th>宠物蛋奖励</th>
                   <th>更新时间</th>
                   <th className="action-col">操作</th>
@@ -1599,7 +1655,10 @@ function RechargeActivityPage({ onNotify }) {
               </thead>
               <tbody>
                 {filteredActivities.map((activity) => {
-                  const rewardCount = activity.tiers.reduce(
+                  const rechargeTiers = activity.type === "recharge"
+                    ? activity.tiers || []
+                    : [];
+                  const rewardCount = rechargeTiers.reduce(
                     (total, tier) =>
                       total + tier.rewards.reduce((sum, reward) => sum + reward.quantity, 0),
                     0,
@@ -1609,12 +1668,29 @@ function RechargeActivityPage({ onNotify }) {
                       <td className="activity-key-cell">{activity.key}</td>
                       <td><strong>{activity.name}</strong></td>
                       <td>
-                        <strong>{activity.tiers.length} 个</strong>
-                        <small className="block muted">
-                          {activity.tiers.map((tier) => `$${tier.threshold.toLocaleString()}`).join(" / ")}
-                        </small>
+                        <span className="activity-type-pill">
+                          {activityTypes.find((type) => type.value === activity.type)?.label}
+                        </span>
                       </td>
-                      <td><strong>{rewardCount} 枚</strong></td>
+                      <td>
+                        {activity.type === "recharge" ? (
+                          <>
+                            <strong>{rechargeTiers.length} 个充值阶梯</strong>
+                            <small className="block muted">
+                              {rechargeTiers.map((tier) => `$${tier.threshold.toLocaleString()}`).join(" / ")}
+                            </small>
+                          </>
+                        ) : (
+                          <span className="muted">按活动类型配置</span>
+                        )}
+                      </td>
+                      <td>
+                        {activity.type === "recharge" ? (
+                          <strong>{rewardCount} 枚</strong>
+                        ) : (
+                          <span className="muted">—</span>
+                        )}
+                      </td>
                       <td className="muted">{activity.updated}</td>
                       <td>
                         <button
@@ -1634,9 +1710,17 @@ function RechargeActivityPage({ onNotify }) {
           </div>
         ) : (
           <div className="empty-state">
-            <strong>没有符合条件的充值活动</strong>
-            <p>请调整关键词或新建充值活动。</p>
-            <button className="btn" onClick={() => setKeyword("")}>重置筛选</button>
+            <strong>没有符合条件的活动</strong>
+            <p>请调整关键词、活动类型或新建活动。</p>
+            <button
+              className="btn"
+              onClick={() => {
+                setKeyword("");
+                setTypeFilter("全部");
+              }}
+            >
+              重置筛选
+            </button>
           </div>
         )}
 
@@ -1651,7 +1735,7 @@ function RechargeActivityPage({ onNotify }) {
       </section>
 
       {activityDrawer && (
-        <RechargeActivityDrawer
+        <ActivityDrawer
           activity={activityDrawer.item}
           mode={activityDrawer.mode}
           existingKeys={activities.map((item) => item.key)}
@@ -1699,9 +1783,9 @@ export function App() {
       listDescription: "",
       placeholder: "",
     },
-    rechargeActivity: {
-      title: "充值活动配置",
-      description: "通过活动 Key 管理充值阶梯和宠物蛋奖励。",
+    activity: {
+      title: "活动配置",
+      description: "统一管理不同活动类型的公共信息、业务规则和奖励内容。",
       listTitle: "",
       listDescription: "",
       placeholder: "",
@@ -1789,13 +1873,13 @@ export function App() {
           宠物蛋发送
         </button>
         <button
-          className={`nav-item ${module === "rechargeActivity" ? "active" : ""}`}
+          className={`nav-item ${module === "activity" ? "active" : ""}`}
           onClick={() => {
-            setModule("rechargeActivity");
+            setModule("activity");
             resetFilters();
           }}
         >
-          充值活动配置
+          活动配置
         </button>
         <div className="sidebar-foot">
           <span>生产环境</span>
@@ -1830,8 +1914,8 @@ export function App() {
         <div className="content">
           {module === "eggGrant" ? (
             <EggGrantPage onSent={notify} />
-          ) : module === "rechargeActivity" ? (
-            <RechargeActivityPage onNotify={notify} />
+          ) : module === "activity" ? (
+            <ActivityConfigPage onNotify={notify} />
           ) : (
             <section className="panel">
             <div className="panel-head">

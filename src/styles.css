@@ -1436,7 +1436,7 @@ tbody tr:hover {
 
 .activity-filters {
   display: grid;
-  grid-template-columns: minmax(420px, 1fr) auto;
+  grid-template-columns: minmax(380px, 1fr) 160px auto;
   gap: 12px;
   align-items: end;
   padding: 16px 20px;
@@ -1454,14 +1454,22 @@ tbody tr:hover {
 }
 
 .activity-table th:nth-child(3),
-.activity-table td:nth-child(3),
+.activity-table td:nth-child(3) {
+  width: 110px;
+}
+
 .activity-table th:nth-child(4),
 .activity-table td:nth-child(4) {
-  width: 120px;
+  width: 190px;
 }
 
 .activity-table th:nth-child(5),
 .activity-table td:nth-child(5) {
+  width: 110px;
+}
+
+.activity-table th:nth-child(6),
+.activity-table td:nth-child(6) {
   width: 145px;
 }
 
@@ -1470,6 +1478,19 @@ tbody tr:hover {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 12px;
   font-weight: 750;
+}
+
+.activity-type-pill {
+  display: inline-flex;
+  min-height: 24px;
+  align-items: center;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: #eaf1ff;
+  color: #2451a6;
+  font-size: 11px;
+  font-weight: 760;
+  white-space: nowrap;
 }
 
 .activity-drawer {
