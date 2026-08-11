@@ -1454,19 +1454,14 @@ tbody tr:hover {
 }
 
 .activity-table th:nth-child(3),
-.activity-table td:nth-child(3) {
-  width: 130px;
-}
-
+.activity-table td:nth-child(3),
 .activity-table th:nth-child(4),
-.activity-table td:nth-child(4),
-.activity-table th:nth-child(5),
-.activity-table td:nth-child(5) {
+.activity-table td:nth-child(4) {
   width: 120px;
 }
 
-.activity-table th:nth-child(7),
-.activity-table td:nth-child(7) {
+.activity-table th:nth-child(5),
+.activity-table td:nth-child(5) {
   width: 145px;
 }
 
@@ -1475,13 +1470,6 @@ tbody tr:hover {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 12px;
   font-weight: 750;
-}
-
-.activity-link-cell {
-  max-width: 180px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .activity-drawer {
@@ -1493,10 +1481,6 @@ tbody tr:hover {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
-}
-
-.activity-link-field {
-  grid-column: 1 / -1;
 }
 
 .activity-tier-list {

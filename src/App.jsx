@@ -83,9 +83,6 @@ const initialRechargeActivities = [
   {
     key: "PET_RECHARGE_MONTHLY",
     name: "充值送宠物",
-    cycle: "月度累计",
-    resetRule: "每月1日 00:00",
-    walletLink: "app://wallet/recharge",
     tiers: [
       {
         id: "TIER-01",
@@ -1218,9 +1215,6 @@ function RechargeActivityDrawer({
 }) {
   const [activityKey, setActivityKey] = useState(activity?.key || "");
   const [name, setName] = useState(activity?.name || "");
-  const [walletLink, setWalletLink] = useState(
-    activity?.walletLink || "app://wallet/recharge",
-  );
   const [tiers, setTiers] = useState(() => {
     const source = activity?.tiers?.length
       ? activity.tiers
@@ -1319,10 +1313,6 @@ function RechargeActivityDrawer({
       setError("请填写活动名称");
       return;
     }
-    if (!walletLink.trim()) {
-      setError("请填写客户端钱包跳转链接");
-      return;
-    }
     if (!tiers.length) {
       setError("请至少添加一个充值阶梯");
       return;
@@ -1344,9 +1334,6 @@ function RechargeActivityDrawer({
     onSaved({
       key: normalizedKey,
       name: name.trim(),
-      cycle: "月度累计",
-      resetRule: "每月1日 00:00",
-      walletLink: walletLink.trim(),
       tiers: tiers.map(({ id, threshold, rewards }) => ({
         id,
         threshold: Number(threshold),
@@ -1366,7 +1353,7 @@ function RechargeActivityDrawer({
               {mode === "create" ? "NEW RECHARGE ACTIVITY" : activity.key}
             </p>
             <h2>{mode === "create" ? "新建充值活动" : `编辑 ${activity.name}`}</h2>
-            <p>配置活动识别 Key、月度重置规则、充值阶梯和宠物蛋奖励。</p>
+            <p>配置活动识别 Key、充值阶梯和宠物蛋奖励。</p>
           </div>
           <button className="text-btn" onClick={onClose}>关闭</button>
         </header>
@@ -1397,24 +1384,6 @@ function RechargeActivityDrawer({
                   onChange={(event) => setName(event.target.value)}
                   placeholder="请输入后台活动名称"
                 />
-              </div>
-              <div className="field">
-                <label htmlFor="activity-cycle">累计周期</label>
-                <input id="activity-cycle" value="月度累计" disabled />
-              </div>
-              <div className="field">
-                <label htmlFor="activity-reset">数据重置时间</label>
-                <input id="activity-reset" value="每月1日 00:00" disabled />
-              </div>
-              <div className="field activity-link-field">
-                <label htmlFor="activity-wallet-link">底部按钮跳转链接 *</label>
-                <input
-                  id="activity-wallet-link"
-                  value={walletLink}
-                  onChange={(event) => setWalletLink(event.target.value)}
-                  placeholder="请输入客户端钱包页面链接"
-                />
-                <small>客户端点击活动页底部“去充值”后跳转至该地址。</small>
               </div>
             </div>
           </section>
@@ -1541,9 +1510,6 @@ function RechargeActivityDrawer({
             </div>
           </section>
 
-          <div className="impact-note">
-            每月1日00:00仅重置用户累计充值进度和任务领取状态，已进入背包的奖励不会回收。
-          </div>
           {error && <div className="form-error">{error}</div>}
         </div>
 
@@ -1564,7 +1530,7 @@ function RechargeActivityPage({ onNotify }) {
   const [keyword, setKeyword] = useState("");
   const [activityDrawer, setActivityDrawer] = useState(null);
   const filteredActivities = activities.filter((activity) =>
-    `${activity.key}${activity.name}${activity.walletLink}`
+    `${activity.key}${activity.name}`
       .toLowerCase()
       .includes(keyword.toLowerCase()),
   );
@@ -1609,7 +1575,7 @@ function RechargeActivityPage({ onNotify }) {
               id="activity-keyword"
               value={keyword}
               onChange={(event) => setKeyword(event.target.value)}
-              placeholder="搜索活动 Key / 活动名称 / 钱包链接"
+              placeholder="搜索活动 Key / 活动名称"
             />
           </div>
           <div className="filter-actions">
@@ -1625,10 +1591,8 @@ function RechargeActivityPage({ onNotify }) {
                 <tr>
                   <th>活动 Key</th>
                   <th>活动名称</th>
-                  <th>累计周期</th>
                   <th>充值阶梯</th>
                   <th>宠物蛋奖励</th>
-                  <th>钱包跳转</th>
                   <th>更新时间</th>
                   <th className="action-col">操作</th>
                 </tr>
@@ -1645,17 +1609,12 @@ function RechargeActivityPage({ onNotify }) {
                       <td className="activity-key-cell">{activity.key}</td>
                       <td><strong>{activity.name}</strong></td>
                       <td>
-                        <strong>{activity.cycle}</strong>
-                        <small className="block muted">{activity.resetRule}</small>
-                      </td>
-                      <td>
                         <strong>{activity.tiers.length} 个</strong>
                         <small className="block muted">
                           {activity.tiers.map((tier) => `$${tier.threshold.toLocaleString()}`).join(" / ")}
                         </small>
                       </td>
                       <td><strong>{rewardCount} 枚</strong></td>
-                      <td className="muted activity-link-cell">{activity.walletLink}</td>
                       <td className="muted">{activity.updated}</td>
                       <td>
                         <button
@@ -1742,7 +1701,7 @@ export function App() {
     },
     rechargeActivity: {
       title: "充值活动配置",
-      description: "通过活动 Key 管理月度累计充值阶梯、宠物蛋奖励和钱包跳转。",
+      description: "通过活动 Key 管理充值阶梯和宠物蛋奖励。",
       listTitle: "",
       listDescription: "",
       placeholder: "",
