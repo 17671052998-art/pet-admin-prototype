@@ -237,6 +237,7 @@ const formResources = [
     star: "一星",
     level: "初始形态",
     thumbnail: "moon-1-thumbnail.webp",
+    externalDisplay: "moon-1-profile.webp",
     idle: "moon-1-idle.webp",
     interact: "moon-1-interact.mp4",
   },
@@ -244,6 +245,7 @@ const formResources = [
     star: "二星",
     level: "30",
     thumbnail: "moon-2-thumbnail.webp",
+    externalDisplay: "moon-2-profile.webp",
     idle: "moon-2-idle.mp4",
     interact: "moon-2-interact.webp",
   },
@@ -251,6 +253,7 @@ const formResources = [
     star: "三星",
     level: "50",
     thumbnail: "moon-3-thumbnail.webp",
+    externalDisplay: "moon-3-profile.webp",
     idle: "moon-3-idle.webp",
     interact: "moon-3-interact.mp4",
   },
@@ -478,7 +481,7 @@ function PetDrawer({ mode, pet, onClose, onSaved }) {
               <div className="section-title">
                 <h3>三星形态资源</h3>
                 <p>
-                  形态按进化等级解锁；待机与互动资源均支持 WebP / MP4。
+                  形态按进化等级解锁；每个形态独立配置主页 / 资料卡片展示资源。
                 </p>
               </div>
               <div className="form-resource-list">
@@ -503,6 +506,13 @@ function PetDrawer({ mode, pet, onClose, onSaved }) {
                         title="封面缩略图 *"
                         file={item.thumbnail}
                         accept="PNG / WebP"
+                      />
+                      <UploadField
+                        title="主页 / 资料卡片展示资源 *"
+                        file={item.externalDisplay}
+                        accept="PNG / WebP"
+                        previewable
+                        removable
                       />
                       <UploadField
                         title="待机形态资源 *"
